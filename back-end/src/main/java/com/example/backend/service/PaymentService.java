@@ -1,27 +1,27 @@
 package com.example.backend.service;
 
-import com.example.backend.dao.PaymentRepository;
+import com.example.backend.repository.PaymentRepository;
 import com.example.backend.model.Payment;
 import com.example.backend.model.PaymentStatus;
 import com.example.backend.model.ShopOrder;
-import com.example.util.JmsConfig;
-import com.example.util.JmsConsumer;
-import com.example.util.JmsProducer;
+import com.example.util.jms.JmsConfig;
+import com.example.util.jms.JmsConsumer;
+import com.example.util.jms.JmsProducer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
-import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.example.util.UnitOfWork.doUnitOfWork;
 
-@Singleton
+@ApplicationScoped
 public class PaymentService implements MessageListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);

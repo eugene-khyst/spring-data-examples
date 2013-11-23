@@ -1,20 +1,20 @@
 package com.example.api.service;
 
-import com.example.util.JmsConfig;
-import com.example.util.JmsProducer;
+import com.example.util.jms.JmsConfig;
+import com.example.util.jms.JmsProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
-import javax.inject.Singleton;
 import static com.example.util.UnitOfWork.doUnitOfWork;
 
-@Singleton
+@ApplicationScoped
 public class PaymentService {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);

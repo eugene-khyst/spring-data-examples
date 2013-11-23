@@ -1,4 +1,4 @@
-package com.example.util;
+package com.example.util.jms;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

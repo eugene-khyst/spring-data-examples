@@ -1,8 +1,8 @@
-package com.example.backend.dao;
+package com.example.backend.repository;
 
 import com.example.backend.model.Payment;
 import com.example.backend.model.ShopOrder;
-import com.example.util.Transactional;
+import com.example.util.transaction.Transactional;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

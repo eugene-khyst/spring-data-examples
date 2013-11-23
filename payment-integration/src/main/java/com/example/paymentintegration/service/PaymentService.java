@@ -1,8 +1,8 @@
 package com.example.paymentintegration.service;
 
-import com.example.util.JmsConfig;
-import com.example.util.JmsConsumer;
-import com.example.util.JmsProducer;
+import com.example.util.jms.JmsConfig;
+import com.example.util.jms.JmsConsumer;
+import com.example.util.jms.JmsProducer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -14,9 +14,9 @@ import javax.jms.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.example.util.UnitOfWork.doUnitOfWork;
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 
-@Singleton
+@ApplicationScoped
 public class PaymentService implements MessageListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
@@ -92,6 +92,6 @@ public class PaymentService implements MessageListener {
         
         doUnitOfWork();
         
-        return amount > 100 ? "DONE" : "FAILED";
+        return (((int) amount) % 10 == 1) ? "FAILED" : "DONE";
     }
 }

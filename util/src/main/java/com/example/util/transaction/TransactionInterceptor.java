@@ -1,4 +1,4 @@
-package com.example.util;
+package com.example.util.transaction;
 
 import javax.annotation.Resource;
 import javax.interceptor.AroundInvoke;
