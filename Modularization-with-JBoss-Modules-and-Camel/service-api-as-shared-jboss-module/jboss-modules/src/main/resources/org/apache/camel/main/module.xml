@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="org.apache.camel">
+    <resources>
+        <resource-root path="camel-core-${camel.version}.jar"/>
+        <resource-root path="camel-spring-${camel.version}.jar"/>
+    </resources>
+    <dependencies>
+        <module name="sun.jdk"/>
+        <module name="javaee.api"/>
+        <module name="com.sun.xml.bind"/>
+        <module name="org.slf4j"/>
+        <module name="org.springframework" optional="true"/>
+    </dependencies>
+</module>
+
