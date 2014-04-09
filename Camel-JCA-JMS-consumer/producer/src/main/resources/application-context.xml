@@ -14,7 +14,7 @@
     
     <camelContext id="testCamelContext" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="testServiceProxy" serviceUrl="direct:testServiceProxy"
-               serviceInterface="com.example.jboss.hornetq.service.TestService"/>
+               serviceInterface="com.example.camel.service.TestService"/>
 
         <endpoint id="testServiceEndpoint" uri="${testService.endpoint}" />
 

@@ -28,21 +28,20 @@
                       method="receive"/>
     </jms:jca-listener-container>
 
-    <bean id="jcaMessageListener" class="com.example.jboss.hornetq.messaging.JcaMessageListener" />
+    <bean id="jcaMessageListener" class="com.example.camel.messaging.JcaMessageListener" />
     
-    <bean id="testService" class="com.example.jboss.hornetq.service.TestServiceImpl">
+    <bean id="testService" class="com.example.camel.service.TestServiceImpl">
         <property name="sleepSeconds" value="${sleepSeconds}" />
     </bean>
     
     <camelContext id="testServicesExportCamelContext" xmlns="http://camel.apache.org/schema/spring">
         <export id="testServiceExport" uri="direct:testServiceImpl" serviceRef="testService"
-                serviceInterface="com.example.jboss.hornetq.service.TestService"/>
+                serviceInterface="com.example.camel.service.TestService"/>
         
         <endpoint id="testServiceEndpoint" uri="${testService.endpoint}" />
         
         <route id="testServiceExportRoute">
             <from uri="direct:testServiceExport" />
-<!--            <from ref="testServiceEndpoint" />-->
             <wireTap uri="log:testServiceLog?showAll=true&amp;multiline=true" />
             <to uri="direct:testServiceImpl" />
         </route>

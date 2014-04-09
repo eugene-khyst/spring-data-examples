@@ -10,6 +10,6 @@
 
     <mvc:annotation-driven />
 
-    <context:component-scan base-package="com.example.jboss.hornetq.web" />
+    <context:component-scan base-package="com.example.camel.web" />
 	
 </beans>
