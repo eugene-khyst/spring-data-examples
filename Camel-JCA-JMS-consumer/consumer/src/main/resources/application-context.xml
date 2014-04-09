@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns:jboss="http://www.jboss.org/schema/snowdrop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+        http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+        http://www.jboss.org/schema/snowdrop http://www.jboss.org/schema/snowdrop/snowdrop.xsd"
+       default-autowire="byName">
+
+    <import resource="classpath:/hornetq-client.xml" />
+    
+    <context:property-placeholder />
+    
+    <jboss:activation-spec-factory id="activationSpecFactory"/>
+    
+    <jboss:resource-adapter id="resourceAdapter" />
+    
+    <jms:jca-listener-container resource-adapter="resourceAdapter" 
+                                acknowledge="auto" 
+                                activation-spec-factory="activationSpecFactory">
+        <jms:listener destination="${testService.destination}" 
+                      ref="jcaMessageListener" 
+                      method="receive"/>
+    </jms:jca-listener-container>
+
+    <bean id="jcaMessageListener" class="com.example.jboss.hornetq.messaging.JcaMessageListener" />
+    
+    <bean id="testService" class="com.example.jboss.hornetq.service.TestServiceImpl">
+        <property name="sleepSeconds" value="${sleepSeconds}" />
+    </bean>
+    
+    <camelContext id="testServicesExportCamelContext" xmlns="http://camel.apache.org/schema/spring">
+        <export id="testServiceExport" uri="direct:testServiceImpl" serviceRef="testService"
+                serviceInterface="com.example.jboss.hornetq.service.TestService"/>
+        
+        <endpoint id="testServiceEndpoint" uri="${testService.endpoint}" />
+        
+        <route id="testServiceExportRoute">
+            <from uri="direct:testServiceExport" />
+<!--            <from ref="testServiceEndpoint" />-->
+            <wireTap uri="log:testServiceLog?showAll=true&amp;multiline=true" />
+            <to uri="direct:testServiceImpl" />
+        </route>
+    </camelContext>
+    
+</beans>
