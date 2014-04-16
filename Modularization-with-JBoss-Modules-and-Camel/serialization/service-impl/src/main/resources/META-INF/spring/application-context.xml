@@ -17,6 +17,9 @@
                 <serialization />
             </unmarshal>
             <bean ref="testServiceImpl" />
+            <marshal>
+                <serialization />
+            </marshal>
         </route>
     </camelContext>
     
