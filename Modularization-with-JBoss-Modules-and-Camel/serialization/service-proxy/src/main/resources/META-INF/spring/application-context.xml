@@ -22,6 +22,9 @@
                 <serialization />
             </marshal>
             <to ref="testServiceImplEndpoint" />
+            <unmarshal>
+                <serialization />
+            </unmarshal>
         </route>
     </camelContext>
     
