@@ -1,3 +1,5 @@
+Alternative to OSGi Dynamic Services with Apache Camel and JBoss Modules
+
 mvn clean install
 
 rm -r $JBOSS_HOME/modules/org/

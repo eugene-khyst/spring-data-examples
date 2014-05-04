@@ -1,4 +1,4 @@
-Apache Camel JCA JMS consumer
+Apache Camel JCA JMS Consumer
 =============================
 
 Pooled Connection Factory (hornetq-ra)
