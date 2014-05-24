@@ -3,18 +3,8 @@
     <deployment>
         <dependencies>
             <module name="com.example.modularization.service-api" />
-            <module name="org.springframework">
-                <imports>
-                    <include path="META-INF**"/>
-                    <include path="org**"/>
-                </imports>
-            </module>
-            <module name="org.apache.camel">
-                <imports>
-                    <include path="META-INF**"/>
-                    <include path="org**"/>
-                </imports>
-            </module>
+            <module name="org.springframework" meta-inf="import" />
+            <module name="org.apache.camel" meta-inf="import" />
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

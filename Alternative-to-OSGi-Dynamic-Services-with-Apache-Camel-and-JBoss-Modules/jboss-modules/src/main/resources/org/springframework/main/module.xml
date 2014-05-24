@@ -14,7 +14,6 @@
     <dependencies>
         <module name="org.jboss.vfs"/>
         <module name="javaee.api"/>
-        <module name="com.sun.xml.bind"/>
         <module name="org.slf4j.jcl-over-slf4j"/>
     </dependencies>
 </module>
