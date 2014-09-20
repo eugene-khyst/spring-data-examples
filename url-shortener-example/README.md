@@ -9,7 +9,7 @@ This is URL Shortener prototype - not a production or fancy system.
   * Receives URL and returns "shortened" version. E.g. post "http://github.com" to "http://127.0.0.1/" and get back "http://127.0.0.1/2Bi".
   * The shortened URL can be resolved to original URL. E.g. "http://127.0.0.1/2Bi" will return "http://github.com".
 
-Application uses pure Java EE 7 API. Recommended application server is Wildfly 8.1.
+Application uses pure Java EE 7 API. Recommended application server is Wildfly 8.1. This example can be used as Java EE 7 kick off application.
 
 Maven is used for easy compilation and packaging.
 
