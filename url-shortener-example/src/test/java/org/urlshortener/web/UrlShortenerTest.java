@@ -16,12 +16,15 @@
 package org.urlshortener.web;
 
 import java.io.File;
+import java.net.URL;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -41,7 +44,7 @@ public class UrlShortenerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlShortenerTest.class);
 
-    @Deployment
+    @Deployment(testable = false)
     public static Archive<?> createDeployment() {
         return ShrinkWrap.create(WebArchive.class, "urlShortenerTest.war")
                 .addPackages(true, "org.urlshortener")
@@ -53,12 +56,13 @@ public class UrlShortenerTest {
                 .setWebXML(new File("src/main/webapp/WEB-INF/web.xml"));
     }
 
+    @RunAsClient
     @Test
-    public void testUrlShorteningAndResolving() throws Exception {
+    public void testUrlShorteningAndResolving(@ArquillianResource URL baseUrl) throws Exception {
         String originalUrl = "https://github.com/";
         
         Client client = ClientBuilder.newClient();
-        Response postResponse = client.target("http://127.0.0.1:8080/urlShortenerTest/")
+        Response postResponse = client.target(baseUrl.toURI())
                 .request()
                 .post(Entity.text(originalUrl));
         
