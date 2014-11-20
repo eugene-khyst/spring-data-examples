@@ -16,6 +16,10 @@
 
 package org.urlshortener.web;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -38,17 +42,19 @@ public class UrlShortener {
     
     @POST
     @Path("/")
-    public Response shortenUrl(@Context HttpServletRequest request, String url) {
-        String shortendUrl = urlShortener.shortenUrl(url);
-        return Response.ok(request.getRequestURL().append(shortendUrl).toString()).build();
+    public Response shortenUrl(@Context HttpServletRequest request, String url) throws MalformedURLException {
+        String shortendUri = urlShortener.shortenUrl(url);
+        URL baseUrl = new URL(request.getRequestURL().toString());
+        String shortendUrl = new URL(baseUrl, shortendUri).toString();
+        return Response.ok(shortendUrl).build();
     }
     
     @GET
     @Path("/{shortenedUrl}")
-    public Response resolveShortenedUrl(@PathParam("shortenedUrl") String shortenedUrl) {
+    public Response resolveShortenedUrl(@PathParam("shortenedUrl") String shortenedUrl) throws URISyntaxException {
         String resolvedUrl = urlShortener.resolveShortenedUrl(shortenedUrl);
         if (resolvedUrl != null) {
-            return Response.ok(resolvedUrl).build();
+            return Response.seeOther(new URI(resolvedUrl)).entity(resolvedUrl).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }

@@ -31,16 +31,16 @@ import org.urlshortener.repository.ShortenedUrlRepository;
  * @author Evgeniy Khist
  */
 @MessageDriven(name = "IncrementNumberOfViewsMDB", activationConfig = {
-    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "queue/IncrementNumberOfViewsQueue"),
     @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-    @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge")})
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "queue/IncrementNumberOfViewsQueue")
+})
 public class IncrementNumberOfViewsMDB implements MessageListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IncrementNumberOfViewsMDB.class);
-    
+
     @Inject
     private ShortenedUrlRepository shortenedUrlRepository;
-    
+
     @Override
     public void onMessage(Message message) {
         if (message instanceof ObjectMessage) {

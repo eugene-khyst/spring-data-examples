@@ -39,7 +39,7 @@ public class UrlShortenerServiceTest {
 
     @Test
     public void testUrlShorteningAndResolving() {
-        int numberOfIterations = 100;
+        int numberOfIterations = 10;
         for (int i = 0; i <= numberOfIterations; i++) {
             String originalUrl = "https://github.com/?" + i;
             String shortendUrl = urlShortenerService.shortenUrl(originalUrl);

@@ -21,6 +21,9 @@ limitations under the License.
         <configuration>
             <property name="jbossHome">target/wildfly-${versions.wildfly}</property>
             <property name="serverConfig">standalone-full.xml</property>
+            <!-- -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787 -->
+            <property name="javaVmArguments">-Djboss.socket.binding.port-offset=100</property>
+            <property name="managementPort">10090</property>
         </configuration>
     </container>
 </arquillian>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+Copyright 2014 Evgeniy Khist.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+    <head>
+        <title>URL Shortener</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/uikit.min.css" />
+        <link rel="stylesheet" href="css/uikit.gradient.min.css" />
+        <script src="js/jquery-2.1.1.min.js"></script>
+        <script src="js/uikit.min.js"></script>
+        <script>
+            $(function () {
+                $('#shorten-button').on('click', function () {
+                    var longUrl = $('#url-input').val();
+                    $.post('s/', longUrl)
+                            .done(function (shortUrl) {
+                                var rowHtml = $('script[type="text/template"]#shortened-url-table-row').html()
+                                        .replace(/:longUrl/g, longUrl)
+                                        .replace(/:shortUrl/g, shortUrl);
+                                $('#shortened-url').append($(rowHtml));
+                            });
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+            <div class="uk-grid">
+                <div class="uk-width-1-1">
+                    <form class="uk-panel uk-panel-box uk-form">
+                        <fieldset data-uk-margin>
+                            <legend>Paste your long URL here:</legend>
+                            <input id="url-input" class="uk-form-large uk-form-width-large" type="text" placeholder="URL">
+                            <a id="shorten-button" class="uk-button uk-button-primary uk-button-large" href="#">Shorten URL</a>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div class="uk-width-1-1">
+                    <table class="uk-margin-top uk-table uk-table-hover uk-table-striped uk-table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Long URL</th>
+                                <th>Short URL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shortened-url">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <script type="text/template" id="shortened-url-table-row">
+            <tr>
+                <td>
+                    <a href=":longUrl">:longUrl</a>
+                </td>
+                <td>
+                    <a href=":shortUrl">:shortUrl</a>
+                </td>
+            </tr>
+        </script>
+    </body>
+</html>

@@ -61,13 +61,16 @@ public class UrlShortenerTest {
     public void testUrlShorteningAndResolving(@ArquillianResource URL baseUrl) throws Exception {
         String originalUrl = "https://github.com/";
         
+        URL shortenUrl = new URL(baseUrl, "s/");
+        LOGGER.info("POST {} => {}", shortenUrl, originalUrl);
+        
         Client client = ClientBuilder.newClient();
-        Response postResponse = client.target(baseUrl.toURI())
+        Response postResponse = client.target(shortenUrl.toURI())
                 .request()
                 .post(Entity.text(originalUrl));
         
         String shortenedUrl = postResponse.readEntity(String.class);
-        LOGGER.info("{} => {}", shortenedUrl, originalUrl);
+        LOGGER.info("GET {} => {}", shortenedUrl, originalUrl);
         
         Response getResponse = client.target(shortenedUrl)
                 .request()
