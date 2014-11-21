@@ -26,7 +26,7 @@ mvn clean package
 To run specific test use:
 
 ```bash
-mvn test -Dtest=UrlShortenerTest
+mvn clean verify -Dit.test=UrlShortenerResourceIT
 ```
 
 Each time URL is submitted a new record is inserted into the database.
