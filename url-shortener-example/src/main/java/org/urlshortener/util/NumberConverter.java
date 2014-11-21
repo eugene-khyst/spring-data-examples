@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package org.urlshortener.service;
-
-import java.util.Collection;
-import org.urlshortener.model.ShortenedUrl;
+package org.urlshortener.util;
 
 /**
  *
  * @author Evgeniy Khist
  */
-public interface UrlShortenerService {
+public interface NumberConverter {
 
-    String resolveShortenedUrl(String shortenedUrl);
-
-    String shortenUrl(String url);
+    String convertToAlphabeth(long number);
     
-    Collection<ShortenedUrl> getLastShortenedUrls(int maxResults);
+    long convertFromAlphabeth(String number);
     
 }

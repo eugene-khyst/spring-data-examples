@@ -6,16 +6,16 @@ This is URL Shortener prototype - not a production or fancy system.
 * It is written in Java.
 * It is an HTTP REST-based service
 * It does two things:
-  * Receives URL and returns "shortened" version. E.g. post "http://github.com" to "http://127.0.0.1/" and get back "http://127.0.0.1/2Bi".
-  * The shortened URL can be resolved to original URL. E.g. "http://127.0.0.1/2Bi" will return "http://github.com".
+  * Receives URL and returns "shortened" version. E.g. post "http://github.com" to "http://127.0.0.1/s/" and get back "http://127.0.0.1/s/2Bi".
+  * The shortened URL can be resolved to original URL. E.g. "http://127.0.0.1/s/2Bi" will return "http://github.com".
 
 Application uses pure Java EE 7 API. Recommended application server is Wildfly 8.1. This example can be used as Java EE 7 kick off application.
 
 Maven is used for easy compilation and packaging.
 
 Arquillian is used for real testing on real container. 
-Maven will download Wildfly 8.1 distribution then Arquillian will deploy application and run tests. 
-Take a look ate test working with REST API - `org.urlshortener.web.UrlShortenerTest`.
+Maven will download Wildfly 8.1.0.Final distribution then Arquillian will deploy application and run tests. 
+Take a look ate test working with REST API - `org.urlshortener.web.UrlShortenerResourceIT`.
 
 To compile project and run tests use:
 
@@ -40,7 +40,7 @@ To resolve "shortened" URL string identifying original URL will be converted bac
 Primary key column is always indexed. Search by numeric column is always faster than seach by text column. 
 Radix 62 allows to save space - 10000 in radix 10 equals 2Bi in radix 62.
 
-E.g. URL "http://github.com/" shortened to "http://127.0.0.1/2Bi"
+E.g. URL "http://github.com/" shortened to "http://127.0.0.1/s/2Bi"
 
 * Inserting new record to database with id 10000 for original URL "http://github.com/" representing "shortened" URL 
 * Converting id 10000 to radix 62 - 2Bi

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.urlshortener.model;
 
 import java.io.Serializable;
@@ -21,6 +20,7 @@ import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,26 +28,32 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import org.urlshortener.repository.ShortenedUrlEntityListener;
 
 /**
  *
  * @author Evgeniy Khist
  */
 @Entity
+@EntityListeners({ShortenedUrlEntityListener.class})
 @Table(name = "SHORTENED_URL")
 public class ShortenedUrl implements Serializable {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGenerator")
     @SequenceGenerator(name = "idGenerator", sequenceName = "SHORTENED_URL_SEQ", allocationSize = 100, initialValue = 10000)
     @Column(name = "SHORTENED_URL_ID")
     private Long id;
+
+    @Transient
+    private String shortUrl;
     
     @NotNull
     @Column(name = "FULL_URL", nullable = false)
     private String fullUrl;
-    
+
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CREATED_TIMESTAMP", nullable = false)
@@ -56,11 +62,11 @@ public class ShortenedUrl implements Serializable {
     @NotNull
     @Column(name = "NUM_VIEWS", nullable = false)
     private Long numberOfViews = 0L;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_VIEW_TIMESTAMP", nullable = true)
-    private Date lastViewTimestamp = new Date();
-    
+    private Date lastViewTimestamp;
+
     // Default constructor for JPA
     public ShortenedUrl() {
     }
@@ -68,9 +74,17 @@ public class ShortenedUrl implements Serializable {
     public ShortenedUrl(String fullUrl) {
         this.fullUrl = fullUrl;
     }
-    
+
     public Long getId() {
         return id;
+    }
+
+    public String getShortUrl() {
+        return shortUrl;
+    }
+
+    public void setShortUrl(String shortUrl) {
+        this.shortUrl = shortUrl;
     }
 
     public String getFullUrl() {
@@ -88,7 +102,7 @@ public class ShortenedUrl implements Serializable {
     public void setNumberOfViews(Long numberOfViews) {
         this.numberOfViews = numberOfViews;
     }
-    
+
     public Date getLastViewTimestamp() {
         return lastViewTimestamp;
     }
@@ -96,7 +110,7 @@ public class ShortenedUrl implements Serializable {
     public void setLastViewTimestamp(Date lastViewTimestamp) {
         this.lastViewTimestamp = lastViewTimestamp;
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 7;

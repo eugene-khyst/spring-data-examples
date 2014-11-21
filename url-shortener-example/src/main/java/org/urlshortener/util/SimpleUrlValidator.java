@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.urlshortener.util;
 
-package org.urlshortener.service;
+import org.apache.commons.validator.routines.UrlValidator;
 
 /**
  *
  * @author Evgeniy Khist
  */
-public interface NumberConverter {
+public class SimpleUrlValidator implements org.urlshortener.util.UrlValidator {
 
-    String convertToAlphabeth(long number);
-    
-    long convertFromAlphabeth(String number);
-    
+    @Override
+    public boolean isValid(String url) {
+        UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        return urlValidator.isValid(url);
+    }
 }

@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.urlshortener.service;
-
-import java.util.Collection;
-import org.urlshortener.model.ShortenedUrl;
+package org.urlshortener.util;
 
 /**
  *
  * @author Evgeniy Khist
  */
-public interface UrlShortenerService {
-
-    String resolveShortenedUrl(String shortenedUrl);
-
-    String shortenUrl(String url);
+public interface UrlValidator {
     
-    Collection<ShortenedUrl> getLastShortenedUrls(int maxResults);
+    boolean isValid(String url);
     
 }

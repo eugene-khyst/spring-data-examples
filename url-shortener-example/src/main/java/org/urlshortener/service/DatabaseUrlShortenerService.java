@@ -16,6 +16,8 @@
 
 package org.urlshortener.service;
 
+import org.urlshortener.util.NumberConverter;
+import java.util.Collection;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import org.slf4j.Logger;
@@ -32,21 +34,15 @@ public class DatabaseUrlShortenerService implements UrlShortenerService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUrlShortenerService.class);
     
-    private final ShortenedUrlRepository shortenedUrlRepository;
-    private final NumberConverter numberConverter;
-    private final IncrementNumberOfViewsService incrementNumberOfViewsService;
-
     @Inject
-    public DatabaseUrlShortenerService(
-            ShortenedUrlRepository shortenedUrlRepository, 
-            NumberConverter numberConverter, 
-            IncrementNumberOfViewsService incrementNumberOfViewsService) {
-        
-        this.shortenedUrlRepository = shortenedUrlRepository;
-        this.numberConverter = numberConverter;
-        this.incrementNumberOfViewsService = incrementNumberOfViewsService;
-    }
+    private ShortenedUrlRepository shortenedUrlRepository;
     
+    @Inject
+    private NumberConverter numberConverter;
+    
+    @Inject
+    private IncrementNumberOfViewsService incrementNumberOfViewsService;
+
     @Override
     public String shortenUrl(String url) {
         ShortenedUrl shortenedUrl = new ShortenedUrl(url);
@@ -67,5 +63,10 @@ public class DatabaseUrlShortenerService implements UrlShortenerService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Collection<ShortenedUrl> getLastShortenedUrls(int maxResults) {
+        return shortenedUrlRepository.findLatest(maxResults);
     }
 }

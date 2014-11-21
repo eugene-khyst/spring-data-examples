@@ -16,6 +16,7 @@
 
 package org.urlshortener.repository;
 
+import java.util.Collection;
 import org.urlshortener.model.ShortenedUrl;
 
 /**
@@ -25,6 +26,8 @@ import org.urlshortener.model.ShortenedUrl;
 public interface ShortenedUrlRepository {
 
     ShortenedUrl findById(Long id);
+    
+    Collection<ShortenedUrl> findLatest(int limit);
 
     void save(ShortenedUrl shortenedUrl);
     

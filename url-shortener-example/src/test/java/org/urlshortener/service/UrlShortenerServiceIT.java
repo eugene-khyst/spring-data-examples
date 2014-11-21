@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
  * @author Yevhen Khyst
  */
 @RunWith(Arquillian.class)
-public class UrlShortenerServiceTest {
+public class UrlShortenerServiceIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UrlShortenerServiceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlShortenerServiceIT.class);
     
     @Inject
     private UrlShortenerService urlShortenerService;

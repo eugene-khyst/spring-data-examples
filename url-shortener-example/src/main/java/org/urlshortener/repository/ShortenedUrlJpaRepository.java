@@ -15,11 +15,14 @@
  */
 package org.urlshortener.repository;
 
+import java.util.Collection;
 import java.util.Date;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
@@ -36,7 +39,7 @@ import org.urlshortener.model.ShortenedUrl_;
 public class ShortenedUrlJpaRepository implements ShortenedUrlRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShortenedUrlJpaRepository.class);
-    
+
     @Inject
     private EntityManager em;
 
@@ -51,15 +54,26 @@ public class ShortenedUrlJpaRepository implements ShortenedUrlRepository {
     }
 
     @Override
+    public Collection<ShortenedUrl> findLatest(int maxResults) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<ShortenedUrl> cq = cb.createQuery(ShortenedUrl.class);
+        Root<ShortenedUrl> shortenedUrl = cq.from(ShortenedUrl.class);
+        cq.select(shortenedUrl);
+        cq.orderBy(cb.asc(shortenedUrl.get(ShortenedUrl_.createdTimestamp)));
+        TypedQuery<ShortenedUrl> query = em.createQuery(cq).setMaxResults(maxResults);
+        return query.getResultList();
+    }
+
+    @Override
     public void incrementNumberOfViews(Long shortenedUrlId) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaUpdate update = cb.createCriteriaUpdate(ShortenedUrl.class);
-        Root su = update.from(ShortenedUrl.class);
-        update.set(ShortenedUrl_.numberOfViews, cb.sum(su.get(ShortenedUrl_.numberOfViews), 1));
+        CriteriaUpdate cu = cb.createCriteriaUpdate(ShortenedUrl.class);
+        Root<ShortenedUrl> shortenedUrl = cu.from(ShortenedUrl.class);
+        cu.set(ShortenedUrl_.numberOfViews, cb.sum(shortenedUrl.get(ShortenedUrl_.numberOfViews), 1));
         Date currentTimestamp = getCurrentTimestamp();
-        update.set(ShortenedUrl_.lastViewTimestamp, currentTimestamp);
-        update.where(cb.equal(su.get(ShortenedUrl_.id), shortenedUrlId));
-        Query query = em.createQuery(update);
+        cu.set(ShortenedUrl_.lastViewTimestamp, currentTimestamp);
+        cu.where(cb.equal(shortenedUrl.get(ShortenedUrl_.id), shortenedUrlId));
+        Query query = em.createQuery(cu);
         int rowCount = query.executeUpdate();
         if (rowCount == 1) {
             LOGGER.info("Number of views and last view timestamp for ShortenedUrl with id {} were updated", shortenedUrlId);
@@ -68,7 +82,7 @@ public class ShortenedUrlJpaRepository implements ShortenedUrlRepository {
         }
     }
 
-    protected static Date getCurrentTimestamp() {
+    private Date getCurrentTimestamp() {
         return new Date();
     }
 }

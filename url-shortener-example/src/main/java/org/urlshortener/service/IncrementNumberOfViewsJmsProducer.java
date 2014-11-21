@@ -24,7 +24,7 @@ import javax.jms.Queue;
  *
  * @author Evgeniy Khist
  */
-public class IncrementNumberOfViewsJmsClient implements IncrementNumberOfViewsService {
+public class IncrementNumberOfViewsJmsProducer implements IncrementNumberOfViewsService {
 
     @Inject
     private JMSContext context;

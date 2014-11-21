@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.urlshortener.util;
 
-package org.urlshortener.service;
-
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Evgeniy Khist
  */
-public class AnyRadixBaseNumberConverterTest {
+public class SimpleUrlValidatorTest {
     
     @Test
-    public void testConvert() {
-        AnyRadixBaseNumberConverter converter;
+    public void testIsValid() {
+        SimpleUrlValidator urlValidator = new SimpleUrlValidator();
         
-        converter = new AnyRadixBaseNumberConverter("0123456789");
-        assertEquals("1234", converter.convertToAlphabeth(1234L));
-        assertEquals(1234L, converter.convertFromAlphabeth("1234"));
-        
-        converter = new AnyRadixBaseNumberConverter("0123456789abcdefghijklmnopqrstuvwxyz");
-        assertEquals("ya", converter.convertToAlphabeth(1234));
-        assertEquals(1234L, converter.convertFromAlphabeth("ya"));
+        assertTrue(urlValidator.isValid("http://openshift.com"));
+        assertFalse(urlValidator.isValid("openshift.com"));
+        assertFalse(urlValidator.isValid("www.openshift.com"));
+        assertTrue(urlValidator.isValid("https://openshift.com"));
+        assertTrue(urlValidator.isValid("https://www.openshift.com"));
+        assertFalse(urlValidator.isValid("somestring"));
+        assertFalse(urlValidator.isValid("1"));
+        assertFalse(urlValidator.isValid("ftp://example.com"));
     }
 }

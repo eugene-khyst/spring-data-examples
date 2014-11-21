@@ -27,18 +27,32 @@ import javax.inject.Inject;
  */
 public class PropertiesProducer {
 
-    private final PropertiesSource propertiesSource;
-
     @Inject
-    public PropertiesProducer(PropertiesSource propertiesSource) {
-        this.propertiesSource = propertiesSource;
-    }
-    
+    private PropertiesSource propertiesSource;
+
     @Produces
     @Property
     public String getStringProperty(InjectionPoint ip) {
         Property property = ip.getAnnotated().getAnnotation(Property.class);
         Properties properties = propertiesSource.getProperties();
-        return properties.getProperty(property.value(), property.defaultValue());
+        if (property.required() && !properties.containsKey(property.value())) {
+            throw new RuntimeException("Could not find property " + property.value());
+        }
+        String result = properties.getProperty(property.value(), property.defaultValue());
+        return result;
+    }
+    
+    @Produces
+    @Property
+    public Integer getIntegerProperty(InjectionPoint ip) {
+        String stringProperty = getStringProperty(ip);
+        return stringProperty != null ? Integer.parseInt(stringProperty) : null;
+    }
+    
+    @Produces
+    @Property
+    public Long getLongProperty(InjectionPoint ip) {
+        String stringProperty = getStringProperty(ip);
+        return stringProperty != null ? Long.parseLong(stringProperty) : null;
     }
 }

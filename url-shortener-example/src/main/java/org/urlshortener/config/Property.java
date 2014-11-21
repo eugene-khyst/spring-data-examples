@@ -41,4 +41,7 @@ public @interface Property {
     @Nonbinding
     String defaultValue() default "";
     
+    @Nonbinding
+    boolean required() default false;
+    
 }

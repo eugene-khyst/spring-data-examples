@@ -374,8 +374,8 @@
         <subsystem xmlns="urn:jboss:domain:messaging:2.0">
             <hornetq-server>
                 <journal-file-size>102400</journal-file-size>
-                <thread-pool-max-size>${messaging.thread.pool.max.size}</thread-pool-max-size>
-                <scheduled-thread-pool-max-size>${messaging.scheduled.thread.pool.max.size}</scheduled-thread-pool-max-size>
+                <thread-pool-max-size>10</thread-pool-max-size>
+                <scheduled-thread-pool-max-size>10</scheduled-thread-pool-max-size>
                 <connectors>
                     <http-connector name="http-connector" socket-binding="http">
                         <param key="http-upgrade-endpoint" value="http-acceptor"/>
