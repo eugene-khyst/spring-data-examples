@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.hornetq</groupId>
+    <artifactId>hornetq-maven-plugin</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+
+    <name>HornetQ Maven plugin example</name>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+ 
+    <repositories>
+        <repository>
+            <id>JBoss repository</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+ 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        
+        <versions.jms-api>1.0.0.Final</versions.jms-api>
+        <versions.hornetq>2.4.5.Final</versions.hornetq>
+        <versions.netty>4.0.13.Final</versions.netty>
+        <versions.jnpserver>5.0.3.GA</versions.jnpserver>
+    </properties>
+
+    <dependencies>
+        <!-- JMS 2.0 API -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_2.0_spec</artifactId>
+            <version>${versions.jms-api}</version>
+        </dependency>
+        
+        <!-- Dependencies required for JNDI lookup -->
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-jms-client</artifactId>
+            <version>${versions.hornetq}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.naming</groupId>
+            <artifactId>jnpserver</artifactId>
+            <version>${versions.jnpserver}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.hornetq</groupId>
+                <artifactId>hornetq-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jboss.spec.javax.jms</groupId>
+                        <artifactId>jboss-jms-api_2.0_spec</artifactId>
+                        <version>${versions.jms-api}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hornetq</groupId>
+                        <artifactId>hornetq-core-client</artifactId>
+                        <version>${versions.hornetq}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hornetq</groupId>
+                        <artifactId>hornetq-server</artifactId>
+                        <version>${versions.hornetq}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hornetq</groupId>
+                        <artifactId>hornetq-jms-client</artifactId>
+                        <version>${versions.hornetq}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hornetq</groupId>
+                        <artifactId>hornetq-jms-server</artifactId>
+                        <version>${versions.hornetq}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-all</artifactId>
+                        <version>${versions.netty}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jboss.naming</groupId>
+                        <artifactId>jnpserver</artifactId>
+                        <version>${versions.jnpserver}
+                        </version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <phase>post-integration-test</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <waitOnStart>false</waitOnStart>
+                    <hornetqConfigurationDir>${project.build.testOutputDirectory}/hornetq/</hornetqConfigurationDir>
+                    <systemProperties>
+                        <data.dir>${project.build.directory}/hornetq/data</data.dir>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
