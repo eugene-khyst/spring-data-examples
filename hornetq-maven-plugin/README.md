@@ -1,3 +1,6 @@
+HornetQ Maven Plugin
+====================
+
 HornetQ Maven plugin ([maven-hornetq-plugin](https://github.com/hornetq/maven-hornetq-plugin)) is a useful tool for integration testing. 
 The article describes how to configure Maven project to start HornetQ server and run JMS client.
 
