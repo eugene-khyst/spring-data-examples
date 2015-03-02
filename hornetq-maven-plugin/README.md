@@ -96,7 +96,7 @@ Configure plugin executions to start and stop HornetQ server
 </executions>
 ```
 
-In order to make JNDI lookup on HornetQ naming server and use JMS API add the following dependencies to *pom.xml*
+In order to make JNDI lookup from HornetQ naming server and use JMS API add the following dependencies to *pom.xml*
 
 ```xml
 <dependencies>
