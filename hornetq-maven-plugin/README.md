@@ -1,4 +1,4 @@
-HornetQ Maven Plugin
+HornetQ Maven PluginOS
 ====================
 
 HornetQ Maven plugin ([maven-hornetq-plugin](https://github.com/hornetq/maven-hornetq-plugin)) is a useful tool for integration testing. 
@@ -69,8 +69,7 @@ Dependencies should be added not as pom.xml dependencies, but as plugin dependen
 	<dependency>
 		<groupId>org.jboss.naming</groupId>
 		<artifactId>jnpserver</artifactId>
-		<version>${versions.jnpserver}
-		</version>
+		<version>${versions.jnp}</version>
 	</dependency>
 </dependencies>
 ```
@@ -114,8 +113,8 @@ In order to make JNDI lookup from HornetQ naming server and use JMS API add the 
 	</dependency>
 	<dependency>
 		<groupId>org.jboss.naming</groupId>
-		<artifactId>jnpserver</artifactId>
-		<version>${versions.jnpserver}</version>
+		<artifactId>jnp-client</artifactId>
+		<version>${versions.jnp}</version>
 	</dependency>
 </dependencies>
 ```

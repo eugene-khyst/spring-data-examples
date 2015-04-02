@@ -33,7 +33,7 @@
         <versions.jms-api>1.0.0.Final</versions.jms-api>
         <versions.hornetq>2.4.5.Final</versions.hornetq>
         <versions.netty>4.0.13.Final</versions.netty>
-        <versions.jnpserver>5.0.3.GA</versions.jnpserver>
+        <versions.jnp>5.0.3.GA</versions.jnp>
     </properties>
 
     <dependencies>
@@ -52,8 +52,8 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.naming</groupId>
-            <artifactId>jnpserver</artifactId>
-            <version>${versions.jnpserver}</version>
+            <artifactId>jnp-client</artifactId>
+            <version>${versions.jnp}</version>
         </dependency>
         
         <dependency>
@@ -104,7 +104,7 @@
                     <dependency>
                         <groupId>org.jboss.naming</groupId>
                         <artifactId>jnpserver</artifactId>
-                        <version>${versions.jnpserver}
+                        <version>${versions.jnp}
                         </version>
                     </dependency>
                 </dependencies>
