@@ -1,4 +1,4 @@
-HornetQ Maven PluginOS
+HornetQ Maven Plugin
 ====================
 
 HornetQ Maven plugin ([maven-hornetq-plugin](https://github.com/hornetq/maven-hornetq-plugin)) is a useful tool for integration testing. 
