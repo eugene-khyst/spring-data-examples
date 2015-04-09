@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example.javaee</groupId>
-    <artifactId>remote-ejb-invocation</artifactId>
+    <artifactId>asynchronous-ejb</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>Remote EJB invocation example</name>
+    <name>Asynchronous EJB example</name>
 
     <licenses>
         <license>
@@ -20,10 +20,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         
-        <versions.wildfly>8.1.0.Final</versions.wildfly>
+        <versions.wildfly>8.2.0.Final</versions.wildfly>
     </properties>
 
     <dependencyManagement>
@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>1.1.5.Final</version>
+                <version>1.1.7.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -42,21 +42,21 @@
         <dependency>
             <groupId>org.jboss.spec</groupId>
             <artifactId>jboss-javaee-all-7.0</artifactId>
-            <version>1.0.1.Final</version>
+            <version>1.0.2.Final</version>
             <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>1.7.12</version>
             <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         
@@ -85,7 +85,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <inherited>true</inherited>
                 <configuration>
                     <source>${maven.compiler.source}</source>
@@ -95,12 +95,12 @@
             
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <version>2.18.1</version>
             </plugin>
             
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
+                <version>2.10</version>
                 <configuration>
                     <skip>${skipTests}</skip>
                 </configuration>

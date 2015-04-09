@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.jmx</groupId>
+    <artifactId>programmatic-jmx</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+
+    <name>Programmatic JMX access</name>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+ 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>exec-remote-jmx-server</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="java"
+                                      dir="${project.build.outputDirectory}"
+                                      spawn="true">
+                                    <arg value="-Dcom.sun.management.jmxremote.port=9999"/>
+                                    <arg value="-Dcom.sun.management.jmxremote.authenticate=false"/>
+                                    <arg value="-Dcom.sun.management.jmxremote.ssl=false"/>
+                                    <!-- Uncomment if you are getting "Connection refused to host" error message. -->
+                                    <!--<arg value="-Djava.rmi.server.hostname=localhost"/>-->
+                                    <arg value="-classpath"/>
+                                    <arg value="${project.build.outputDirectory}"/>
+                                    <arg value="com.example.jmx.Main"/>
+                                </exec>  
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
