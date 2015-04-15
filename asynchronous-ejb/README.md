@@ -71,7 +71,7 @@ long timeout = 100;
 long totalTimeout = 10 * timeout;
 
 // Start long running task asynchronously 
-Future<Long> result = exampleService.performLongRunningTask(timeout);
+Future<Long> result = asynchronousService.performLongRunningTask(timeout);
 
 TimeUnit.MILLISECONDS.sleep(totalTimeout);
 
