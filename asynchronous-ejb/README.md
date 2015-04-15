@@ -16,11 +16,11 @@ public class AsynchronousServiceBean implements AsynchronousService {
 
     @Asynchronous
     @Override
-    public Future<Long> performLongRunningTask(String jobName) {
+    public Future<Long> performLongRunningTask(long timeout) {
         long startTime = System.currentTimeMillis();
         doPerformLongRunningTask(timeout);
         long time = System.currentTimeMillis() - startTime;
-        return new AsyncResult<>(jobName);
+        return new AsyncResult<>(time);
     }
 
     private void doPerformLongRunningTask(long timeout) {
