@@ -9,7 +9,7 @@ The method should return either `void` of the `Future<V>` interface representing
 
 The `javax.ejb.AsyncResult<V>` helper class is the implementation of `Future<V>` interface. It accepts result of computation as constructor parameter.
 
-```
+```java
 @Stateless
 @Local(AsynchronousService.class)
 public class AsynchronousServiceBean implements AsynchronousService {
@@ -35,7 +35,7 @@ public class AsynchronousServiceBean implements AsynchronousService {
 
 Use `wasCancelCalled` method of `javax.ejb.SessionContext` class instance that can be injected using `@Resource` annotation to determine whether client cancelled computation using `cancel` method of the `Future<V>` interface.
 
-```
+```java
 @Stateless
 @Local(AsynchronousService.class)
 public class AsynchronousServiceBean implements AsynchronousService {
@@ -66,7 +66,7 @@ public class AsynchronousServiceBean implements AsynchronousService {
 }
 ```
 
-```
+```java
 long timeout = 100;
 long totalTimeout = 10 * timeout;
 
