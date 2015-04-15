@@ -8,3 +8,4 @@ Examples for [http://developer-should-know.tumblr.com](http://developer-should-k
 3. [HornetQ Maven Plugin](https://github.com/evgeniy-khist/examples/tree/master/hornetq-maven-plugin)
 4. [H2 Server Init Script](https://github.com/evgeniy-khist/examples/tree/master/h2-server-init-script)
 5. [Asynchronous Method Invokation in EJB](https://github.com/evgeniy-khist/examples/tree/master/asynchronous-ejb)
+6. [Accessing JMX Data Programmatically](https://github.com/evgeniy-khist/examples/tree/master/programmatic-jmx-access)
