@@ -5,7 +5,8 @@
 #
 # chkconfig: 345 87 13
 # description: H2 database server
-# pidfile: /var/run/h2/h2.pid
+# processname: h2
+# pidfile: /opt/h2/log/h2.log
 # config: /etc/default/h2.conf
 #
 
