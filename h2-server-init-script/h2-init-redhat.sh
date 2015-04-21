@@ -46,13 +46,6 @@ if [ -z "$H2_BASEDIR" ]; then
     H2_BASEDIR=$H2_HOME/db
 fi
 
-if [ -z "$DATABASE" ]; then
-    echo "Database is not set, set DATABASE variable"
-    exit 1
-fi
-
-URL="jdbc:h2:tcp://localhost/$DATABASE;$H2_OPTS"
-
 prog="H2 database"
 
 start () {
@@ -96,24 +89,6 @@ status() {
     return 3
 }
 
-backup () {
-     SCRIPT="$DATABASE.$(date +"%Y%m%d%H%M%S").zip"
-     echo "Backing up $prog to $SCRIPT"
-     cd $H2_HOME/bin
-
-     java -cp h2*.jar $JVM_OPTS org.h2.tools.Script -url $URL -user $USER -password $PASSWORD -script "$H2_BASEDIR/$SCRIPT" -options compression zip
-
-}
-
-restore () {
-     SCRIPT=$1
-     echo "Restoring $prog from $SCRIPT"
-     cd $H2_HOME/bin
-
-     java -cp h2*.jar $JVM_OPTS org.h2.tools.RunScript -url "$URL;create=true" -user $USER -password $PASSWORD -script "$H2_BASEDIR/$SCRIPT" -continueOnError -options compression zip
-
-}
-
 case "$1" in
     start)
       start
@@ -129,14 +104,8 @@ case "$1" in
     status)
       status
       ;;
-    backup)
-      backup
-      ;;
-    restore)
-      restore $2
-      ;;
     *)
-      echo "Usage: /etc/init.d/h2 {start|stop|restart|status|backup|restore }"
+      echo "Usage: /etc/init.d/h2 {start|stop|restart|status}"
       exit 1
       ;;
 esac
