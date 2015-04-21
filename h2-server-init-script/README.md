@@ -61,7 +61,7 @@ service h2 start
 Backing up H2 database
 ----------------------
 
-Copy [h2-backup.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-backup.sh) to _$H2_HOME/bin_
+Copy [h2-backup.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-backup.sh) to _/opt/h2/bin_
 
 ```
 cp h2-backup.sh $H2_HOME/bin
@@ -73,12 +73,12 @@ To backup H2 database
 $H2_HOME/bin/h2-backup.sh jdbc:h2:tcp://localhost/test sa sa test.zip
 ```
 
-Backup script will be located at `$H2_HOME/bin/test.zip`.
+Backup script will be located at _/opt/h2/bin/test.zip_.
 
 Restoring H2 database
 ---------------------
 
-Copy [h2-restore.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-restore.sh) to _$H2_HOME/bin_
+Copy [h2-restore.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-restore.sh) to _/opt/h2/bin_
 
 ```
 cp h2-restore.sh $H2_HOME/bin
@@ -93,7 +93,7 @@ $H2_HOME/bin/h2-restore.sh jdbc:h2:tcp://localhost/test sa sa test.zip
 H2 database interactive command line tool
 -----------------------------------------
 
-Copy [h2-shell.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-shell.sh) to _$H2_HOME/bin_
+Copy [h2-shell.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-shell.sh) to _/opt/h2/bin_
 
 ```
 cp h2-shell.sh $H2_HOME/bin
