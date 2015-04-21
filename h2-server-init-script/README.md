@@ -14,9 +14,9 @@ H2 database installation should have the following directory layout:
 /opt/h2/
        |_ bin/
        |     |_ h2*.jar (H2 jar)
-       |     |_ [h2-backup.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-backup.sh)
-       |     |_ [h2-restore.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-restore.sh)
-       |     |_ [h2-shell.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-shell.sh)
+       |     |_ h2-backup.sh
+       |     |_ h2-restore.sh
+       |     |_ h2-shell.sh
        |     |_ h2.pid
        |_ log/
        |     |_ h2.log
