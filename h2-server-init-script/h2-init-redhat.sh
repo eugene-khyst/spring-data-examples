@@ -4,21 +4,11 @@
 # H2 database control script
 #
 # chkconfig: 345 87 13
-# description: H2 database server
+# description: H2 database startup script
 # processname: h2
-# pidfile: /opt/h2/log/h2.log
+# pidfile: /var/run/h2/h2.pid
 # config: /etc/default/h2.conf
 #
-
-### BEGIN INIT INFO
-# Provides:          H2-Server
-# Required-Start:
-# Required-Stop:
-# Default-Start:     3 5
-# Default-Stop:      0 1 2 6
-# Short-Description: H2-Server
-# Description:       H2 database service
-### END INIT INFO
 
 # Load H2 database init.d configuration.
 if [ -z "$H2_CONF" ]; then
@@ -35,43 +25,56 @@ fi
 export H2_HOME
 
 if [ -z "$H2_PIDFILE" ]; then
-    H2_PIDFILE=$H2_HOME/bin/h2.pid
+    H2_PIDFILE=/var/run/h2/h2.pid
 fi
 export H2_PIDFILE
 
 if [ -z "$H2_CONSOLE_LOG" ]; then
-    H2_CONSOLE_LOG=$H2_HOME/log/h2.log
+    H2_CONSOLE_LOG=/var/log/h2/console.log
 fi
 
 if [ -z "$H2_BASEDIR" ]; then
     H2_BASEDIR=$H2_HOME/db
 fi
 
+if [ -z "$H2_USER" ]; then
+    H2_USER=h2
+fi
+
 prog="H2 database"
 
 start () {
-     if [ -e $H2_PIDFILE ]; then
-        echo "$prog is still running"
-        exit 1
+     if [ -f $H2_PIDFILE ]; then
+        PID=$(cat $H2_PIDFILE)
+        if [ `(ps --pid $PID 2> /dev/null | grep -c $PID 2> /dev/null)` -eq '1' ]; then
+            echo "$prog is already running (pid $PID)"
+            return 1
+        else
+            rm -f $H2_PIDFILE
+        fi
      fi
+     mkdir -p $(dirname $H2_CONSOLE_LOG)
+     cat /dev/null > $H2_CONSOLE_LOG
 
-     cd $H2_HOME/bin
+     mkdir -p $(dirname $H2_PIDFILE)
+     chown $H2_USER $(dirname $H2_PIDFILE) || true
 
-     java -cp h2*.jar $JVM_OPTS org.h2.tools.Server -tcp -baseDir $H2_BASEDIR > $H2_CONSOLE_LOG 2>&1 &
+     su - $H2_USER -c "java -cp $H2_HOME/bin/h2*.jar $JVM_OPTS org.h2.tools.Server -tcp -baseDir $H2_BASEDIR" >> $H2_CONSOLE_LOG 2>&1 &
 
      echo $! > $H2_PIDFILE
      sleep 3
      echo "$prog started."
+     return 0
 }
 
 stop () {
-     if [ -e $H2_PIDFILE ]; then
+     if [ -f $H2_PIDFILE ]; then
          PID=$(cat $H2_PIDFILE)
          kill -TERM ${PID}
-         echo SIGTERM sent to process ${PID}
-         rm $H2_PIDFILE
+         echo "SIGTERM sent to process ${PID}"
+         rm -f $H2_PIDFILE
      else
-         echo File $H2_PIDFILE not found!
+         echo "File $H2_PIDFILE not found!"
      fi
 }
 
