@@ -4,7 +4,7 @@ H2 Server Init Script
 Installing H2 database as a service
 -----------------------------------
 
-Installing H2 database as a service on Linux has multiple advantages like automatic start on system boot, convinient management with service command and other.
+Installing H2 database as a service on Linux has multiple advantages like automatic start on system boot, convinient management with `service` command and other.
 
 To install H2 database as a service on CentOS and other RPM-based Linux distributions do steps described below.
 
