@@ -26,7 +26,7 @@ Download [H2 database JAR](http://central.maven.org/maven2/com/h2database/h2/1.4
 
 ```
 wget http://central.maven.org/maven2/com/h2database/h2/1.4.187/h2-1.4.187.jar
-mv h2-1.4.187.jar /opt/h2/bin/
+cp h2-1.4.187.jar /opt/h2/bin/
 ```
 
 Copy [h2-init-redhat.sh](https://github.com/evgeniy-khist/examples/blob/master/h2-server-init-script/h2-init-redhat.sh) to _/etc/init.d/h2_
