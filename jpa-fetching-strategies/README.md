@@ -25,7 +25,7 @@ Only one collection that is fetched using _JOIN_ strategy can be of type List, o
 
 `HibernateException: cannot simultaneously fetch multiple bags`
 
-When JOIN fetching strategy is used, `setMaxResults` and `setFirstResult` will not add appropriate conditions to SQL query. Result list will contain all rows without limiting and offsetting according to firstResult/maxResults. Instead it will be done in-memory. The warning will be logged:
+When _JOIN_ fetching strategy is used, `setMaxResults` and `setFirstResult` will not add appropriate conditions to SQL query. Result list will contain all rows without limiting and offsetting according to firstResult/maxResults. Instead it will be done in-memory. The warning will be logged:
 
 `WARN HHH000104: firstResult/maxResults specified with collection fetch; applying in memory!`
 
