@@ -21,7 +21,7 @@ To change the number of iterations pass system property `serialization.iteration
 mvn clean install -Dserialization.iterations=1000
 ```
 
-## Test objects
+## Test Data Generation
 
 Objects for serialization benchmarks are stored in JSON format in files in test resources directory.
 
