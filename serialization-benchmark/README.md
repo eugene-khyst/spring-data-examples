@@ -29,7 +29,7 @@ Test objects were created using [JSON Generator](http://www.json-generator.com/)
 
 Small objects were created using template:
 
-```
+```js
 [
   '{{repeat(100)}}',
   {
@@ -45,7 +45,7 @@ Small objects were created using template:
 
 Medium objects were created using template:
 
-```
+```js
 [
   '{{repeat(100)}}',
   {
@@ -90,7 +90,7 @@ Medium objects were created using template:
 
 Large objects were created using template:
 
-```
+```js
 [
   '{{repeat(1)}}',
   {
