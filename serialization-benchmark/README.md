@@ -92,7 +92,7 @@ Large objects were created using template:
 
 ```js
 [
-  '{{repeat(1)}}',
+  '{{repeat(100)}}',
   {
     id: '{{index()}}',
     guid: '{{guid()}}',
