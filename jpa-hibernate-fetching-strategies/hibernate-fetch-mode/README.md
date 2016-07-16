@@ -15,8 +15,8 @@ Hibernate fetch modes tests:
 
 * HQL query and default `FetchMode`
 * Hibernate Criteria query and default `FetchMode`
-* HQL and Hibernate Criteria queries with `FetchMode.SELECT`
-* HQL query and `FetchMode.SUBSELECT`
+* HQL and Hibernate Criteria queries and `FetchMode.SELECT`
+* HQL and Hibernate Criteria queries and `FetchMode.SUBSELECT`
 * HQL query and `FetchMode.JOIN`
 * HQL query with 'join fetch'
 * Hibernate Criteria query and `FetchMode.JOIN`
