@@ -14,7 +14,7 @@ To build project and run all tests use Maven:
 mvn clean install
 ```
 
-JPA fetchig strategies tests:
+JPA fetching strategies tests:
 
 * Find by primary key
 * JPQL and JPA Criteria queries
