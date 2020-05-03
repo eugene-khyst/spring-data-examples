@@ -568,34 +568,36 @@ void findById() {
 ```
 
 2 SQL queries are executed.
-1. Select book and authors. When searching by ID using `CrudRepository.findById`, the default `FetchMode` for associations with `FetchType.EAGER` is `FetchMode.JOIN`: 
-    ```sql
-    SELECT book0_.id               AS id1_1_0_,
-           book0_.isbn             AS isbn2_1_0_,
-           book0_.publication_date AS publicat3_1_0_,
-           book0_.title            AS title4_1_0_,
-           authors1_.book_id       AS book_id1_2_1_,
-           author2_.id             AS authors_2_2_1_,
-           author2_.id             AS id1_0_2_,
-           author2_.full_name      AS full_nam2_0_2_
-    FROM   book book0_
-           LEFT OUTER JOIN book_authors authors1_
-                        ON book0_.id = authors1_.book_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-    WHERE  book0_.id = ? /*57*/
-    ```
-2. Lazily select categories after the first access. When searching by ID using `CrudRepository.findById`, the default `FetchMode` for associations with `FetchType.LAZY` is `FetchMode.SELECT`:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
+
+**(1)** Select book and authors. When searching by ID using `CrudRepository.findById`, the default `FetchMode` for associations with `FetchType.EAGER` is `FetchMode.JOIN` 
+```sql
+SELECT book0_.id               AS id1_1_0_,
+       book0_.isbn             AS isbn2_1_0_,
+       book0_.publication_date AS publicat3_1_0_,
+       book0_.title            AS title4_1_0_,
+       authors1_.book_id       AS book_id1_2_1_,
+       author2_.id             AS authors_2_2_1_,
+       author2_.id             AS id1_0_2_,
+       author2_.full_name      AS full_nam2_0_2_
+FROM   book book0_
+       LEFT OUTER JOIN book_authors authors1_
+                    ON book0_.id = authors1_.book_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+WHERE  book0_.id = ? /*57*/
+```
+
+**(2)** Lazily select categories after the first access. When searching by ID using `CrudRepository.findById`, the default `FetchMode` for associations with `FetchType.LAZY` is `FetchMode.SELECT`
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
    
 ###### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
@@ -620,61 +622,66 @@ void queryMethod() {
 ```
 
 Query selects 2 books, so 5 SQL queries are executed.
-1. Select books. `FetchType.EAGER` has no effect when query method is used (JPQL), so the `FetchMode.SELECT` is used for all associations:
-    ```sql
-    SELECT book0_.id               AS id1_1_,
-           book0_.isbn             AS isbn2_1_,
-           book0_.publication_date AS publicat3_1_,
-           book0_.title            AS title4_1_
-    FROM   book book0_
-    WHERE  book0_.title LIKE ? escape ? /*%Pattern%,\*/
-    ORDER  BY book0_.publication_date DESC
-    LIMIT  ? /*2*/
-    ```
-2. Select authors for the 1st book from the result set. There will be a separate SQL query for each entity and its association from the result set ("N+1 selects" problem):
-    ```sql
-    SELECT authors0_.book_id    AS book_id1_2_0_,
-           authors0_.authors_id AS authors_2_2_0_,
-           author1_.id          AS id1_0_1_,
-           author1_.full_name   AS full_nam2_0_1_
-    FROM   book_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_id = ? /*57*/
-    ```
-3. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT authors0_.book_id    AS book_id1_2_0_,
-           authors0_.authors_id AS authors_2_2_0_,
-           author1_.id          AS id1_0_1_,
-           author1_.full_name   AS full_nam2_0_1_
-    FROM   book_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_id = ? /*58*/
-    ```
-4. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
-5. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
+
+**(1)** Select books. `FetchType.EAGER` has no effect when query method is used (JPQL), so the `FetchMode.SELECT` is used for all associations
+```sql
+SELECT book0_.id               AS id1_1_,
+       book0_.isbn             AS isbn2_1_,
+       book0_.publication_date AS publicat3_1_,
+       book0_.title            AS title4_1_
+FROM   book book0_
+WHERE  book0_.title LIKE ? escape ? /*%Pattern%,\*/
+ORDER  BY book0_.publication_date DESC
+LIMIT  ? /*2*/
+```
+
+**(2)** Select authors for the 1st book from the result set. There will be a separate SQL query for each entity and its association from the result set ("N+1 selects" problem)
+```sql
+SELECT authors0_.book_id    AS book_id1_2_0_,
+       authors0_.authors_id AS authors_2_2_0_,
+       author1_.id          AS id1_0_1_,
+       author1_.full_name   AS full_nam2_0_1_
+FROM   book_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_id = ? /*57*/
+```
+
+**(3)** Select authors for the 2nd book from the result set
+```sql
+SELECT authors0_.book_id    AS book_id1_2_0_,
+       authors0_.authors_id AS authors_2_2_0_,
+       author1_.id          AS id1_0_1_,
+       author1_.full_name   AS full_nam2_0_1_
+FROM   book_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_id = ? /*58*/
+```
+
+**(4)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
+
+**(5)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
 
 ###### <a name="957184c667a66fa2409d3c81d58e0f90"></a>Query method with `@EntityGraph`
 
@@ -716,46 +723,49 @@ void entityGraph() {
 ```
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select books and related authors using join as defined in the Entity Graph:
-    ```sql
-    SELECT book0_.id               AS id1_1_0_,
-           author2_.id             AS id1_0_1_,
-           book0_.isbn             AS isbn2_1_0_,
-           book0_.publication_date AS publicat3_1_0_,
-           book0_.title            AS title4_1_0_,
-           author2_.full_name      AS full_nam2_0_1_,
-           authors1_.book_id       AS book_id1_2_0__,
-           authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           LEFT OUTER JOIN book_authors authors1_
-                        ON book0_.id = authors1_.book_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-    WHERE  book0_.publication_date >? /*2000-01-01*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-3. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select books and related authors using join as defined in the Entity Graph
+```sql
+SELECT book0_.id               AS id1_1_0_,
+       author2_.id             AS id1_0_1_,
+       book0_.isbn             AS isbn2_1_0_,
+       book0_.publication_date AS publicat3_1_0_,
+       book0_.title            AS title4_1_0_,
+       author2_.full_name      AS full_nam2_0_1_,
+       authors1_.book_id       AS book_id1_2_0__,
+       authors1_.authors_id    AS authors_2_2_0__
+FROM   book book0_
+       LEFT OUTER JOIN book_authors authors1_
+                    ON book0_.id = authors1_.book_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+WHERE  book0_.publication_date >? /*2000-01-01*/
+ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(3)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ###### <a name="ce895104ae9e9dd02aafbba89a339104"></a>Query method with `@EntityGraph` and `Pageable`
 
@@ -784,35 +794,37 @@ void entityGraphWithPageable() {
 ```
 
 Query selects 1 book, then the result set is pagination is applied in memory, so 2 SQL queries are executed.
-1. Select books and related authors using join without limiting maximum results (SQL `LIMIT`):
-    ```sql
-    SELECT book0_.id               AS id1_1_0_,
-           author2_.id             AS id1_0_1_,
-           book0_.isbn             AS isbn2_1_0_,
-           book0_.publication_date AS publicat3_1_0_,
-           book0_.title            AS title4_1_0_,
-           author2_.full_name      AS full_nam2_0_1_,
-           authors1_.book_id       AS book_id1_2_0__,
-           authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           LEFT OUTER JOIN book_authors authors1_
-                        ON book0_.id = authors1_.book_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-    WHERE  book0_.publication_date >? /*2000-01-01*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
+
+**(1)** Select books and related authors using join without limiting maximum results (SQL `LIMIT`)
+```sql
+SELECT book0_.id               AS id1_1_0_,
+       author2_.id             AS id1_0_1_,
+       book0_.isbn             AS isbn2_1_0_,
+       book0_.publication_date AS publicat3_1_0_,
+       book0_.title            AS title4_1_0_,
+       author2_.full_name      AS full_nam2_0_1_,
+       authors1_.book_id       AS book_id1_2_0__,
+       authors1_.authors_id    AS authors_2_2_0__
+FROM   book book0_
+       LEFT OUTER JOIN book_authors authors1_
+                    ON book0_.id = authors1_.book_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+WHERE  book0_.publication_date >? /*2000-01-01*/
+ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
 
 ###### <a name="260b142dfcc1f303ff3e67de6da4d730"></a>Query method with `@EntityGraph` with multiple attribute nodes (issue HHH-13740)
 
@@ -859,33 +871,34 @@ void entityGraphMultipleAttributeNodes() {
 }
 ```
 
-1 SQL query is executed:
-1. Select books and related authors and categories using SQL join:
-    ```sql
-    SELECT book0_.id                  AS id1_1_0_,
-           author2_.id                AS id1_0_1_,
-           category4_.id              AS id1_20_2_,
-           book0_.isbn                AS isbn2_1_0_,
-           book0_.publication_date    AS publicat3_1_0_,
-           book0_.title               AS title4_1_0_,
-           author2_.full_name         AS full_nam2_0_1_,
-           authors1_.book_id          AS book_id1_2_0__,
-           authors1_.authors_id       AS authors_2_2_0__,
-           category4_.NAME            AS name2_20_2_,
-           categories3_.book_id       AS book_id1_3_1__,
-           categories3_.categories_id AS categori2_3_1__
-    FROM   book book0_
-           LEFT OUTER JOIN book_authors authors1_
-                        ON book0_.id = authors1_.book_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-           LEFT OUTER JOIN book_categories categories3_
-                        ON book0_.id = categories3_.book_id
-           LEFT OUTER JOIN category category4_
-                        ON categories3_.categories_id = category4_.id
-    WHERE  book0_.publication_date BETWEEN ? AND ? /*2000-01-01,2020-01-01*/
-    ORDER  BY book0_.publication_date ASC
-    ```
+1 SQL query is executed.
+
+**(1)** Select books and related authors and categories using SQL join
+```sql
+SELECT book0_.id                  AS id1_1_0_,
+       author2_.id                AS id1_0_1_,
+       category4_.id              AS id1_20_2_,
+       book0_.isbn                AS isbn2_1_0_,
+       book0_.publication_date    AS publicat3_1_0_,
+       book0_.title               AS title4_1_0_,
+       author2_.full_name         AS full_nam2_0_1_,
+       authors1_.book_id          AS book_id1_2_0__,
+       authors1_.authors_id       AS authors_2_2_0__,
+       category4_.NAME            AS name2_20_2_,
+       categories3_.book_id       AS book_id1_3_1__,
+       categories3_.categories_id AS categori2_3_1__
+FROM   book book0_
+       LEFT OUTER JOIN book_authors authors1_
+                    ON book0_.id = authors1_.book_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+       LEFT OUTER JOIN book_categories categories3_
+                    ON book0_.id = categories3_.book_id
+       LEFT OUTER JOIN category category4_
+                    ON categories3_.categories_id = category4_.id
+WHERE  book0_.publication_date BETWEEN ? AND ? /*2000-01-01,2020-01-01*/
+ORDER  BY book0_.publication_date ASC
+```
 
 ###### <a name="99fac513c058317164ad5a6e20d34f18"></a>`@Query` with JPQL `join fetch`
 
@@ -918,46 +931,49 @@ void jpqlJoinFetch() {
 ```
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select books and related authors using join:
-    ```sql
-    SELECT book0_.id               AS id1_1_0_,
-           author2_.id             AS id1_0_1_,
-           book0_.isbn             AS isbn2_1_0_,
-           book0_.publication_date AS publicat3_1_0_,
-           book0_.title            AS title4_1_0_,
-           author2_.full_name      AS full_nam2_0_1_,
-           authors1_.book_id       AS book_id1_2_0__,
-           authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           INNER JOIN book_authors authors1_
-                   ON book0_.id = authors1_.book_id
-           INNER JOIN author author2_
-                   ON authors1_.authors_id = author2_.id
-    WHERE  book0_.publication_date >? /*2000-01-01*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-3. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select books and related authors using join
+```sql
+SELECT book0_.id               AS id1_1_0_,
+       author2_.id             AS id1_0_1_,
+       book0_.isbn             AS isbn2_1_0_,
+       book0_.publication_date AS publicat3_1_0_,
+       book0_.title            AS title4_1_0_,
+       author2_.full_name      AS full_nam2_0_1_,
+       authors1_.book_id       AS book_id1_2_0__,
+       authors1_.authors_id    AS authors_2_2_0__
+FROM   book book0_
+       INNER JOIN book_authors authors1_
+               ON book0_.id = authors1_.book_id
+       INNER JOIN author author2_
+               ON authors1_.authors_id = author2_.id
+WHERE  book0_.publication_date >? /*2000-01-01*/
+ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(3)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ###### <a name="ff9705f518ec48b7fa77d2d6cd0c3c14"></a>`@Query` with JPQL `join fetch` and `distinct`
 
@@ -987,46 +1003,49 @@ void jpqlJoinFetchDistinct() {
 ```
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select distinct books and related authors using join:
-    ```sql
-    SELECT DISTINCT book0_.id               AS id1_1_0_,
-                    author2_.id             AS id1_0_1_,
-                    book0_.isbn             AS isbn2_1_0_,
-                    book0_.publication_date AS publicat3_1_0_,
-                    book0_.title            AS title4_1_0_,
-                    author2_.full_name      AS full_nam2_0_1_,
-                    authors1_.book_id       AS book_id1_2_0__,
-                    authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           INNER JOIN book_authors authors1_
-                   ON book0_.id = authors1_.book_id
-           INNER JOIN author author2_
-                   ON authors1_.authors_id = author2_.id
-    WHERE  book0_.publication_date >? /*2000-01-01*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-3. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select distinct books and related authors using join
+```sql
+SELECT DISTINCT book0_.id               AS id1_1_0_,
+                author2_.id             AS id1_0_1_,
+                book0_.isbn             AS isbn2_1_0_,
+                book0_.publication_date AS publicat3_1_0_,
+                book0_.title            AS title4_1_0_,
+                author2_.full_name      AS full_nam2_0_1_,
+                authors1_.book_id       AS book_id1_2_0__,
+                authors1_.authors_id    AS authors_2_2_0__
+ FROM   book book0_
+        INNER JOIN book_authors authors1_
+                ON book0_.id = authors1_.book_id
+        INNER JOIN author author2_
+                ON authors1_.authors_id = author2_.id
+ WHERE  book0_.publication_date >? /*2000-01-01*/
+ ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(3)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ###### <a name="e11be536b6f6d686f69f20513138cae0"></a>Custom `@Repository` with Criteria API query
 
@@ -1121,64 +1140,69 @@ void criteriaQuery() {
 `FetchType.EAGER` doesn't have effect on Criteria API, so all related associations are loaded with a separate SQL query (`FetchMode.SELECT`).
 
 Query selects 2 books, so 5 SQL queries are executed.
-1. Select books:
-    ```sql
-    SELECT book0_.id               AS id1_1_,
-           book0_.isbn             AS isbn2_1_,
-           book0_.publication_date AS publicat3_1_,
-           book0_.title            AS title4_1_
-    FROM   book book0_
-           INNER JOIN book_authors authors1_
-                   ON book0_.id = authors1_.book_id
-           INNER JOIN author author2_
-                   ON authors1_.authors_id = author2_.id
-    WHERE  book0_.title LIKE ? /*%Enterprise%*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Select authors for the 1st book from the result set:
-    ```sql
-    SELECT authors0_.book_id    AS book_id1_2_0_,
-           authors0_.authors_id AS authors_2_2_0_,
-           author1_.id          AS id1_0_1_,
-           author1_.full_name   AS full_nam2_0_1_
-    FROM   book_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_id = ? /*58*/
-    ```
-3. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT authors0_.book_id    AS book_id1_2_0_,
-           authors0_.authors_id AS authors_2_2_0_,
-           author1_.id          AS id1_0_1_,
-           author1_.full_name   AS full_nam2_0_1_
-    FROM   book_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_id = ? /*57*/
-    ```
-4. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-5. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select books
+```sql
+SELECT book0_.id               AS id1_1_,
+       book0_.isbn             AS isbn2_1_,
+       book0_.publication_date AS publicat3_1_,
+       book0_.title            AS title4_1_
+FROM   book book0_
+       INNER JOIN book_authors authors1_
+               ON book0_.id = authors1_.book_id
+       INNER JOIN author author2_
+               ON authors1_.authors_id = author2_.id
+WHERE  book0_.title LIKE ? /*%Enterprise%*/
+ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Select authors for the 1st book from the result set
+```sql
+SELECT authors0_.book_id    AS book_id1_2_0_,
+       authors0_.authors_id AS authors_2_2_0_,
+       author1_.id          AS id1_0_1_,
+       author1_.full_name   AS full_nam2_0_1_
+FROM   book_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_id = ? /*58*/
+```
+
+**(3)** Select authors for the 2nd book from the result set
+```sql
+SELECT authors0_.book_id    AS book_id1_2_0_,
+       authors0_.authors_id AS authors_2_2_0_,
+       author1_.id          AS id1_0_1_,
+       author1_.full_name   AS full_nam2_0_1_
+FROM   book_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_id = ? /*57*/
+```
+
+**(4)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(5)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ###### <a name="1323d64c9e1914e06c3b257f7cea728c"></a>Custom `@Repository` with Criteria API query with `fetch`
 
@@ -1206,46 +1230,49 @@ void criteriaQueryFetch() {
 ```
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select books and related authors using SQL join:
-    ```sql
-    SELECT book0_.id               AS id1_1_0_,
-           author2_.id             AS id1_0_1_,
-           book0_.isbn             AS isbn2_1_0_,
-           book0_.publication_date AS publicat3_1_0_,
-           book0_.title            AS title4_1_0_,
-           author2_.full_name      AS full_nam2_0_1_,
-           authors1_.book_id       AS book_id1_2_0__,
-           authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           INNER JOIN book_authors authors1_
-                   ON book0_.id = authors1_.book_id
-           INNER JOIN author author2_
-                   ON authors1_.authors_id = author2_.id
-    WHERE  book0_.title LIKE ? /*%Enterprise%*/
-    ORDER  BY book0_.publication_date ASC
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-3. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select books and related authors using SQL join
+```sql
+SELECT book0_.id               AS id1_1_0_,
+       author2_.id             AS id1_0_1_,
+       book0_.isbn             AS isbn2_1_0_,
+       book0_.publication_date AS publicat3_1_0_,
+       book0_.title            AS title4_1_0_,
+       author2_.full_name      AS full_nam2_0_1_,
+       authors1_.book_id       AS book_id1_2_0__,
+       authors1_.authors_id    AS authors_2_2_0__
+FROM   book book0_
+       INNER JOIN book_authors authors1_
+               ON book0_.id = authors1_.book_id
+       INNER JOIN author author2_
+               ON authors1_.authors_id = author2_.id
+WHERE  book0_.title LIKE ? /*%Enterprise%*/
+ORDER  BY book0_.publication_date ASC
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(3)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ###### <a name="7285e9899741d937830c2225ff8d01bc"></a>Custom `@Repository` with Criteria API query with `fetch` and `distinct`
 
@@ -1272,46 +1299,49 @@ void criteriaQueryFetchDistinct() {
 ```
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select distinct books and related authors using join:
-    ```sql
-    SELECT DISTINCT book0_.id               AS id1_1_0_,
-                    author2_.id             AS id1_0_1_,
-                    book0_.isbn             AS isbn2_1_0_,
-                    book0_.publication_date AS publicat3_1_0_,
-                    book0_.title            AS title4_1_0_,
-                    author2_.full_name      AS full_nam2_0_1_,
-                    authors1_.book_id       AS book_id1_2_0__,
-                    authors1_.authors_id    AS authors_2_2_0__
-    FROM   book book0_
-           INNER JOIN book_authors authors1_
-                   ON book0_.id = authors1_.book_id
-           INNER JOIN author author2_
-                   ON authors1_.authors_id = author2_.id
-    WHERE  book0_.title LIKE ? /*%Enterprise%*/
-    ORDER  BY book0_.publication_date ASC  
-    ```
-2. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*57*/
-    ```
-3. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_id       AS book_id1_3_0_,
-           categories0_.categories_id AS categori2_3_0_,
-           category1_.id              AS id1_20_1_,
-           category1_.NAME            AS name2_20_1_
-    FROM   book_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_id = ? /*58*/
-    ```
+
+**(1)** Select distinct books and related authors using join
+```sql
+ SELECT DISTINCT book0_.id               AS id1_1_0_,
+                 author2_.id             AS id1_0_1_,
+                 book0_.isbn             AS isbn2_1_0_,
+                 book0_.publication_date AS publicat3_1_0_,
+                 book0_.title            AS title4_1_0_,
+                 author2_.full_name      AS full_nam2_0_1_,
+                 authors1_.book_id       AS book_id1_2_0__,
+                 authors1_.authors_id    AS authors_2_2_0__
+ FROM   book book0_
+        INNER JOIN book_authors authors1_
+                ON book0_.id = authors1_.book_id
+        INNER JOIN author author2_
+                ON authors1_.authors_id = author2_.id
+ WHERE  book0_.title LIKE ? /*%Enterprise%*/
+ ORDER  BY book0_.publication_date ASC  
+```
+
+**(2)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*57*/
+```
+
+**(3)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_id       AS book_id1_3_0_,
+       categories0_.categories_id AS categori2_3_0_,
+       category1_.id              AS id1_20_1_,
+       category1_.NAME            AS name2_20_1_
+FROM   book_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_id = ? /*58*/
+```
 
 ##### <a name="239f2f55854878f99d5d4d379a765d39"></a>Entity with `@Fetch(JOIN)`
 
@@ -1362,32 +1392,33 @@ void findById() {
 ```
 
 A single SQL query is executed per `CrudRepository.findById` call.
-1. Select book with authors and categories:
-    ```sql
-     SELECT bookwithfe0_.id                           AS id1_8_0_,
-           bookwithfe0_.isbn                         AS isbn2_8_0_,
-           bookwithfe0_.publication_date             AS publicat3_8_0_,
-           bookwithfe0_.title                        AS title4_8_0_,
-           authors1_.book_with_fetch_mode_join_id    AS book_wit1_9_1_,
-           author2_.id                               AS authors_2_9_1_,
-           author2_.id                               AS id1_0_2_,
-           author2_.full_name                        AS full_nam2_0_2_,
-           categories3_.book_with_fetch_mode_join_id AS book_wit1_10_3_,
-           category4_.id                             AS categori2_10_3_,
-           category4_.id                             AS id1_20_4_,
-           category4_.NAME                           AS name2_20_4_
-    FROM   book_with_fetch_mode_join bookwithfe0_
-           LEFT OUTER JOIN book_with_fetch_mode_join_authors authors1_
-                        ON bookwithfe0_.id = authors1_.book_with_fetch_mode_join_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-           LEFT OUTER JOIN book_with_fetch_mode_join_categories categories3_
-                        ON bookwithfe0_.id =
-                           categories3_.book_with_fetch_mode_join_id
-           LEFT OUTER JOIN category category4_
-                        ON categories3_.categories_id = category4_.id
-    WHERE  bookwithfe0_.id = ?
-    ```
+
+**(1)** Select book with authors and categories
+```sql
+SELECT bookwithfe0_.id                           AS id1_8_0_,
+       bookwithfe0_.isbn                         AS isbn2_8_0_,
+       bookwithfe0_.publication_date             AS publicat3_8_0_,
+       bookwithfe0_.title                        AS title4_8_0_,
+       authors1_.book_with_fetch_mode_join_id    AS book_wit1_9_1_,
+       author2_.id                               AS authors_2_9_1_,
+       author2_.id                               AS id1_0_2_,
+       author2_.full_name                        AS full_nam2_0_2_,
+       categories3_.book_with_fetch_mode_join_id AS book_wit1_10_3_,
+       category4_.id                             AS categori2_10_3_,
+       category4_.id                             AS id1_20_4_,
+       category4_.NAME                           AS name2_20_4_
+FROM   book_with_fetch_mode_join bookwithfe0_
+       LEFT OUTER JOIN book_with_fetch_mode_join_authors authors1_
+                    ON bookwithfe0_.id = authors1_.book_with_fetch_mode_join_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+       LEFT OUTER JOIN book_with_fetch_mode_join_categories categories3_
+                    ON bookwithfe0_.id =
+                       categories3_.book_with_fetch_mode_join_id
+       LEFT OUTER JOIN category category4_
+                    ON categories3_.categories_id = category4_.id
+WHERE  bookwithfe0_.id = ?
+```
 
 ###### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
@@ -1414,61 +1445,66 @@ void queryMethod() {
 ```
 
 Query selects 2 books, so 5 SQL queries are executed.
-1. Select books:
-    ```sql
-    SELECT bookwithfe0_.id               AS id1_8_,
-           bookwithfe0_.isbn             AS isbn2_8_,
-           bookwithfe0_.publication_date AS publicat3_8_,
-           bookwithfe0_.title            AS title4_8_
-    FROM   book_with_fetch_mode_join bookwithfe0_
-    WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
-    ORDER  BY bookwithfe0_.publication_date DESC
-    LIMIT  ? /*2*/
-    ```
-2. Select categories for the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_join_id AS book_wit1_10_0_,
-           categories0_.categories_id                AS categori2_10_0_,
-           category1_.id                             AS id1_20_1_,
-           category1_.NAME                           AS name2_20_1_
-    FROM   book_with_fetch_mode_join_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_join_id = ? /*23*/
-    ```
-3. Select authors for the 1st book from the result set:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_join_id AS book_wit1_9_0_,
-           authors0_.authors_id                   AS authors_2_9_0_,
-           author1_.id                            AS id1_0_1_,
-           author1_.full_name                     AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_join_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_join_id = ? /*23*/
-    ```
-4. Select categories for the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_join_id AS book_wit1_10_0_,
-           categories0_.categories_id                AS categori2_10_0_,
-           category1_.id                             AS id1_20_1_,
-           category1_.NAME                           AS name2_20_1_
-    FROM   book_with_fetch_mode_join_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_join_id = ? /*24*/
-    ```
-5. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_join_id AS book_wit1_9_0_,
-           authors0_.authors_id                   AS authors_2_9_0_,
-           author1_.id                            AS id1_0_1_,
-           author1_.full_name                     AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_join_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_join_id = ? /*24*/
-    ```
+
+**(1)** Select books
+```sql
+SELECT bookwithfe0_.id               AS id1_8_,
+       bookwithfe0_.isbn             AS isbn2_8_,
+       bookwithfe0_.publication_date AS publicat3_8_,
+       bookwithfe0_.title            AS title4_8_
+FROM   book_with_fetch_mode_join bookwithfe0_
+WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
+ORDER  BY bookwithfe0_.publication_date DESC
+LIMIT  ? /*2*/
+```
+
+**(2)** Select categories for the 1st book from the result set
+```sql
+SELECT categories0_.book_with_fetch_mode_join_id AS book_wit1_10_0_,
+       categories0_.categories_id                AS categori2_10_0_,
+       category1_.id                             AS id1_20_1_,
+       category1_.NAME                           AS name2_20_1_
+FROM   book_with_fetch_mode_join_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_join_id = ? /*23*/
+```
+
+**(3)** Select authors for the 1st book from the result set
+```sql
+SELECT authors0_.book_with_fetch_mode_join_id AS book_wit1_9_0_,
+       authors0_.authors_id                   AS authors_2_9_0_,
+       author1_.id                            AS id1_0_1_,
+       author1_.full_name                     AS full_nam2_0_1_
+FROM   book_with_fetch_mode_join_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_join_id = ? /*23*/
+```
+
+**(4)** Select categories for the 2nd book from the result set
+```sql
+SELECT categories0_.book_with_fetch_mode_join_id AS book_wit1_10_0_,
+       categories0_.categories_id                AS categori2_10_0_,
+       category1_.id                             AS id1_20_1_,
+       category1_.NAME                           AS name2_20_1_
+FROM   book_with_fetch_mode_join_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_join_id = ? /*24*/
+```
+
+**(5)** Select authors for the 2nd book from the result set
+```sql
+SELECT authors0_.book_with_fetch_mode_join_id AS book_wit1_9_0_,
+       authors0_.authors_id                   AS authors_2_9_0_,
+       author1_.id                            AS id1_0_1_,
+       author1_.full_name                     AS full_nam2_0_1_
+FROM   book_with_fetch_mode_join_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_join_id = ? /*24*/
+```
 
 ##### <a name="61d561e02c4002d6d6ad4646e5d328f7"></a>Entity with `@Fetch(SELECT)`
 
@@ -1505,38 +1541,41 @@ void findById() {
 }
 ```
 
-3 SQL queries are executed in total:
-1. Select book by ID:
-    ```sql
-    SELECT bookwithfe0_.id               AS id1_11_0_,
-           bookwithfe0_.isbn             AS isbn2_11_0_,
-           bookwithfe0_.publication_date AS publicat3_11_0_,
-           bookwithfe0_.title            AS title4_11_0_
-    FROM   book_with_fetch_mode_select bookwithfe0_
-    WHERE  bookwithfe0_.id = ? /*69*/
-    ```
-2. Select authors for the book:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
-           authors0_.authors_id                     AS authors_2_12_0_,
-           author1_.id                              AS id1_0_1_,
-           author1_.full_name                       AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_select_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_select_id = ? /*69*/
-    ```
-3. Lazily select categories after the first access to the book:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
-           categories0_.categories_id                  AS categori2_13_0_,
-           category1_.id                               AS id1_20_1_,
-           category1_.NAME                             AS name2_20_1_
-    FROM   book_with_fetch_mode_select_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
-    ```
+3 SQL queries are executed in total.
+
+**(1)** Select book by ID
+```sql
+SELECT bookwithfe0_.id               AS id1_11_0_,
+       bookwithfe0_.isbn             AS isbn2_11_0_,
+       bookwithfe0_.publication_date AS publicat3_11_0_,
+       bookwithfe0_.title            AS title4_11_0_
+FROM   book_with_fetch_mode_select bookwithfe0_
+WHERE  bookwithfe0_.id = ? /*69*/
+```
+
+**(2)** Select authors for the book
+```sql
+SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
+       authors0_.authors_id                     AS authors_2_12_0_,
+       author1_.id                              AS id1_0_1_,
+       author1_.full_name                       AS full_nam2_0_1_
+FROM   book_with_fetch_mode_select_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_select_id = ? /*69*/
+```
+
+**(3)** Lazily select categories after the first access to the book
+```sql
+SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
+       categories0_.categories_id                  AS categori2_13_0_,
+       category1_.id                               AS id1_20_1_,
+       category1_.NAME                             AS name2_20_1_
+FROM   book_with_fetch_mode_select_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
+```
 
 ###### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
@@ -1555,61 +1594,66 @@ void queryMethod() {
 ```
 
 Query selects 2 books, so 5 SQL queries are executed.
-1. Select books:
-    ```sql
-    SELECT bookwithfe0_.id               AS id1_11_,
-           bookwithfe0_.isbn             AS isbn2_11_,
-           bookwithfe0_.publication_date AS publicat3_11_,
-           bookwithfe0_.title            AS title4_11_
-    FROM   book_with_fetch_mode_select bookwithfe0_
-    WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
-    ORDER  BY bookwithfe0_.publication_date DESC
-    LIMIT  ? /*2*/
-    ```
-2. Select authors for the 1st book from the result set:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
-           authors0_.authors_id                     AS authors_2_12_0_,
-           author1_.id                              AS id1_0_1_,
-           author1_.full_name                       AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_select_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_select_id = ? /*69*/
-    ```
-3. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
-           authors0_.authors_id                     AS authors_2_12_0_,
-           author1_.id                              AS id1_0_1_,
-           author1_.full_name                       AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_select_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_select_id = ? /*70*/
-    ```
-4. Lazily select categories after the first access to the 1st book from the result set:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
-           categories0_.categories_id                  AS categori2_13_0_,
-           category1_.id                               AS id1_20_1_,
-           category1_.NAME                             AS name2_20_1_
-    FROM   book_with_fetch_mode_select_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_select_id = ? /*70*/
-    ```
-5. Lazily select categories after the first access to the 2nd book from the result set:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
-           categories0_.categories_id                  AS categori2_13_0_,
-           category1_.id                               AS id1_20_1_,
-           category1_.NAME                             AS name2_20_1_
-    FROM   book_with_fetch_mode_select_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
-    ```
+
+**(1)** Select books
+```sql
+SELECT bookwithfe0_.id               AS id1_11_,
+       bookwithfe0_.isbn             AS isbn2_11_,
+       bookwithfe0_.publication_date AS publicat3_11_,
+       bookwithfe0_.title            AS title4_11_
+FROM   book_with_fetch_mode_select bookwithfe0_
+WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
+ORDER  BY bookwithfe0_.publication_date DESC
+LIMIT  ? /*2*/
+```
+
+**(2)** Select authors for the 1st book from the result set
+```sql
+SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
+       authors0_.authors_id                     AS authors_2_12_0_,
+       author1_.id                              AS id1_0_1_,
+       author1_.full_name                       AS full_nam2_0_1_
+FROM   book_with_fetch_mode_select_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_select_id = ? /*69*/
+```
+
+**(3)** Select authors for the 2nd book from the result set
+```sql
+SELECT authors0_.book_with_fetch_mode_select_id AS book_wit1_12_0_,
+       authors0_.authors_id                     AS authors_2_12_0_,
+       author1_.id                              AS id1_0_1_,
+       author1_.full_name                       AS full_nam2_0_1_
+FROM   book_with_fetch_mode_select_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_select_id = ? /*70*/
+```
+
+**(4)** Lazily select categories after the first access to the 1st book from the result set
+```sql
+SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
+       categories0_.categories_id                  AS categori2_13_0_,
+       category1_.id                               AS id1_20_1_,
+       category1_.NAME                             AS name2_20_1_
+FROM   book_with_fetch_mode_select_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_select_id = ? /*70*/
+```
+
+**(5)** Lazily select categories after the first access to the 2nd book from the result set
+```sql
+SELECT categories0_.book_with_fetch_mode_select_id AS book_wit1_13_0_,
+       categories0_.categories_id                  AS categori2_13_0_,
+       category1_.id                               AS id1_20_1_,
+       category1_.NAME                             AS name2_20_1_
+FROM   book_with_fetch_mode_select_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
+```
 
 ##### <a name="76b5b36ea931f6c209971594a5473ffa"></a>Entity with `@Fetch(SUBSELECT)`
 
@@ -1647,38 +1691,41 @@ void findById() {
 `FetchMode.SUBSELECT` when loading entity by ID doesn't have any sense, so Hibernate ignores it for `CrudRepository.findById` calls.
 Instead, `CrudRepository.findById` behaves like with `FetchMode.SELECT`.  
 
-3 SQL queries are executed in total:
-1. Select book by ID:
-    ```sql
-    SELECT bookwithfe0_.id               AS id1_14_0_,
-           bookwithfe0_.isbn             AS isbn2_14_0_,
-           bookwithfe0_.publication_date AS publicat3_14_0_,
-           bookwithfe0_.title            AS title4_14_0_
-    FROM   book_with_fetch_mode_subselect bookwithfe0_
-    WHERE  bookwithfe0_.id = ? /*35*/
-    ```
-2. Select authors for the book:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_subselect_id AS book_wit1_15_0_,
-           authors0_.authors_id                        AS authors_2_15_0_,
-           author1_.id                                 AS id1_0_1_,
-           author1_.full_name                          AS full_nam2_0_1_
-    FROM   book_with_fetch_mode_subselect_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_subselect_id = ? /*35*/
-    ```
-3. Lazily select categories after the first access to the book:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_subselect_id AS book_wit1_16_0_,
-           categories0_.categories_id                     AS categori2_16_0_,
-           category1_.id                                  AS id1_20_1_,
-           category1_.NAME                                AS name2_20_1_
-    FROM   book_with_fetch_mode_subselect_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_subselect_id = ? /*35*/
-    ```
+3 SQL queries are executed in total.
+
+**(1)** Select book by ID
+```sql
+SELECT bookwithfe0_.id               AS id1_14_0_,
+       bookwithfe0_.isbn             AS isbn2_14_0_,
+       bookwithfe0_.publication_date AS publicat3_14_0_,
+       bookwithfe0_.title            AS title4_14_0_
+FROM   book_with_fetch_mode_subselect bookwithfe0_
+WHERE  bookwithfe0_.id = ? /*35*/
+```
+
+**(2)** Select authors for the book
+```sql
+SELECT authors0_.book_with_fetch_mode_subselect_id AS book_wit1_15_0_,
+       authors0_.authors_id                        AS authors_2_15_0_,
+       author1_.id                                 AS id1_0_1_,
+       author1_.full_name                          AS full_nam2_0_1_
+FROM   book_with_fetch_mode_subselect_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_subselect_id = ? /*35*/
+```
+
+**(3)** Lazily select categories after the first access to the book
+```sql
+SELECT categories0_.book_with_fetch_mode_subselect_id AS book_wit1_16_0_,
+       categories0_.categories_id                     AS categori2_16_0_,
+       category1_.id                                  AS id1_20_1_,
+       category1_.NAME                                AS name2_20_1_
+FROM   book_with_fetch_mode_subselect_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_subselect_id = ? /*35*/
+```
 
 ###### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
@@ -1700,48 +1747,47 @@ void queryMethod() {
 solving "N+1 selects" problem.
 But `FetchMode.SUBSELECT` ignores pagination (`LIMIT`) in the sub-select what may lead to loading the whole database table into memory.
 
-3 SQL queries are executed regardless of the result set size:
-1. Select books:
-    ```sql
-    SELECT bookwithfe0_.id               AS id1_14_,
-           bookwithfe0_.isbn             AS isbn2_14_,
-           bookwithfe0_.publication_date AS publicat3_14_,
-           bookwithfe0_.title            AS title4_14_
-    FROM   book_with_fetch_mode_subselect bookwithfe0_
-    WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
-    ORDER  BY bookwithfe0_.publication_date DESC
-    LIMIT  ? /*2*/
-    ```
-2. Select authors for all selected books:
-    ```sql
-    SELECT authors0_.book_with_fetch_mode_subselect_id AS book_wit1_15_1_,
-           authors0_.authors_id                        AS authors_2_15_1_,
-           author1_.id                                 AS id1_0_0_,
-           author1_.full_name                          AS full_nam2_0_0_
-    FROM   book_with_fetch_mode_subselect_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_fetch_mode_subselect_id IN (SELECT bookwithfe0_.id
-                                                           FROM
-                  book_with_fetch_mode_subselect bookwithfe0_
-                                                           WHERE
-                  bookwithfe0_.title LIKE ? ESCAPE ?) /*%Pattern%,\*/
-    ```
-3. Lazily select categories for all selected books after the first access to categories collection of any entity from the result set:
-    ```sql
-    SELECT categories0_.book_with_fetch_mode_subselect_id AS book_wit1_16_1_,
-           categories0_.categories_id                     AS categori2_16_1_,
-           category1_.id                                  AS id1_20_0_,
-           category1_.NAME                                AS name2_20_0_
-    FROM   book_with_fetch_mode_subselect_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_fetch_mode_subselect_id IN (SELECT bookwithfe0_.id
-                                                              FROM
-                  book_with_fetch_mode_subselect bookwithfe0_
-                                                              WHERE
-                  bookwithfe0_.title LIKE ? ESCAPE ?) /*%Pattern%,\*/
-    ```
+3 SQL queries are executed regardless of the result set size.
+
+**(1)** Select books
+```sql
+SELECT bookwithfe0_.id               AS id1_14_,
+       bookwithfe0_.isbn             AS isbn2_14_,
+       bookwithfe0_.publication_date AS publicat3_14_,
+       bookwithfe0_.title            AS title4_14_
+FROM   book_with_fetch_mode_subselect bookwithfe0_
+WHERE  bookwithfe0_.title LIKE ? escape ? /*%Pattern%,\*/
+ORDER  BY bookwithfe0_.publication_date DESC
+LIMIT  ? /*2*/
+```
+
+**(2)** Select authors for all selected books
+```sql
+SELECT authors0_.book_with_fetch_mode_subselect_id AS book_wit1_15_1_,
+       authors0_.authors_id                        AS authors_2_15_1_,
+       author1_.id                                 AS id1_0_0_,
+       author1_.full_name                          AS full_nam2_0_0_
+FROM   book_with_fetch_mode_subselect_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_fetch_mode_subselect_id IN (SELECT bookwithfe0_.id
+                                                       FROM   book_with_fetch_mode_subselect bookwithfe0_
+                                                       WHERE  bookwithfe0_.title LIKE ? ESCAPE ?) /*%Pattern%,\*/
+```
+
+**(3)** Lazily select categories for all selected books after the first access to categories collection of any entity from the result set
+```sql
+SELECT categories0_.book_with_fetch_mode_subselect_id AS book_wit1_16_1_,
+       categories0_.categories_id                     AS categori2_16_1_,
+       category1_.id                                  AS id1_20_0_,
+       category1_.NAME                                AS name2_20_0_
+FROM   book_with_fetch_mode_subselect_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_fetch_mode_subselect_id IN (SELECT bookwithfe0_.id
+                                                          FROM   book_with_fetch_mode_subselect bookwithfe0_
+                                                          WHERE  bookwithfe0_.title LIKE ? ESCAPE ?) /*%Pattern%,\*/
+```
 
 ##### <a name="b77feec501b1fe41ebee44d25e206880"></a>Entity with `@BatchSize`
 
@@ -1779,35 +1825,37 @@ void findById() {
 `@BatchSize` doesn't influence loading entity by ID, so Hibernate ignores it for `CrudRepository.findById` calls.
 So, `CrudRepository.findById` behaves like without explicitly defined `FetchMode` with `@Fetch`.  
 
-3 SQL queries are executed in total:
-1. Select book with authors by ID using SQL join:
-    ```sql
-    SELECT bookwithba0_.id                   AS id1_5_0_,
-           bookwithba0_.isbn                 AS isbn2_5_0_,
-           bookwithba0_.publication_date     AS publicat3_5_0_,
-           bookwithba0_.title                AS title4_5_0_,
-           authors1_.book_with_batch_size_id AS book_wit1_6_1_,
-           author2_.id                       AS authors_2_6_1_,
-           author2_.id                       AS id1_0_2_,
-           author2_.full_name                AS full_nam2_0_2_
-    FROM   book_with_batch_size bookwithba0_
-           LEFT OUTER JOIN book_with_batch_size_authors authors1_
-                        ON bookwithba0_.id = authors1_.book_with_batch_size_id
-           LEFT OUTER JOIN author author2_
-                        ON authors1_.authors_id = author2_.id
-    WHERE  bookwithba0_.id = ? /*11*/
-    ```
-2. Lazily select categories after the first access to the book:
-    ```sql
-    SELECT categories0_.book_with_batch_size_id AS book_wit1_7_1_,
-           categories0_.categories_id           AS categori2_7_1_,
-           category1_.id                        AS id1_20_0_,
-           category1_.NAME                      AS name2_20_0_
-    FROM   book_with_batch_size_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_batch_size_id = ? /*11*/
-    ```
+2 SQL queries are executed in total.
+
+**(1)** Select book with authors by ID using SQL join
+```sql
+SELECT bookwithba0_.id                   AS id1_5_0_,
+       bookwithba0_.isbn                 AS isbn2_5_0_,
+       bookwithba0_.publication_date     AS publicat3_5_0_,
+       bookwithba0_.title                AS title4_5_0_,
+       authors1_.book_with_batch_size_id AS book_wit1_6_1_,
+       author2_.id                       AS authors_2_6_1_,
+       author2_.id                       AS id1_0_2_,
+       author2_.full_name                AS full_nam2_0_2_
+FROM   book_with_batch_size bookwithba0_
+       LEFT OUTER JOIN book_with_batch_size_authors authors1_
+                    ON bookwithba0_.id = authors1_.book_with_batch_size_id
+       LEFT OUTER JOIN author author2_
+                    ON authors1_.authors_id = author2_.id
+WHERE  bookwithba0_.id = ? /*11*/
+```
+
+**(2)** Lazily select categories after the first access to the book
+```sql
+SELECT categories0_.book_with_batch_size_id AS book_wit1_7_1_,
+       categories0_.categories_id           AS categori2_7_1_,
+       category1_.id                        AS id1_20_0_,
+       category1_.NAME                      AS name2_20_0_
+FROM   book_with_batch_size_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_batch_size_id = ? /*11*/
+```
 
 ###### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
@@ -1828,39 +1876,42 @@ void queryMethod() {
 With `@BatchSize(size = batchSize)` Hibernate generates (1 + ceil(N / batchSize)).
 
 Query selects 2 books, so 3 SQL queries are executed.
-1. Select books:
-    ```sql
-    SELECT bookwithba0_.id               AS id1_5_,
-           bookwithba0_.isbn             AS isbn2_5_,
-           bookwithba0_.publication_date AS publicat3_5_,
-           bookwithba0_.title            AS title4_5_
-    FROM   book_with_batch_size bookwithba0_
-    WHERE  bookwithba0_.title LIKE ? escape ? /*%Pattern%,\*/
-    ORDER  BY bookwithba0_.publication_date DESC
-    LIMIT  ? /*2*/
-    ```
-2. Select authors for 2 selected books using SQL `IN` operator:
-    ```sql
-    SELECT authors0_.book_with_batch_size_id AS book_wit1_6_1_,
-           authors0_.authors_id              AS authors_2_6_1_,
-           author1_.id                       AS id1_0_0_,
-           author1_.full_name                AS full_nam2_0_0_
-    FROM   book_with_batch_size_authors authors0_
-           INNER JOIN author author1_
-                   ON authors0_.authors_id = author1_.id
-    WHERE  authors0_.book_with_batch_size_id IN ( ?, ? ) /*11,12*/
-    ```
-3. Lazily select categories for 2 selected books after the first access to categories collection of any entity from the result set:
-    ```sql
-    SELECT categories0_.book_with_batch_size_id AS book_wit1_7_1_,
-           categories0_.categories_id           AS categori2_7_1_,
-           category1_.id                        AS id1_20_0_,
-           category1_.NAME                      AS name2_20_0_
-    FROM   book_with_batch_size_categories categories0_
-           INNER JOIN category category1_
-                   ON categories0_.categories_id = category1_.id
-    WHERE  categories0_.book_with_batch_size_id IN ( ?, ? ) /*12,11*/
-    ```
+
+**(1)** Select books
+```sql
+SELECT bookwithba0_.id               AS id1_5_,
+       bookwithba0_.isbn             AS isbn2_5_,
+       bookwithba0_.publication_date AS publicat3_5_,
+       bookwithba0_.title            AS title4_5_
+FROM   book_with_batch_size bookwithba0_
+WHERE  bookwithba0_.title LIKE ? escape ? /*%Pattern%,\*/
+ORDER  BY bookwithba0_.publication_date DESC
+LIMIT  ? /*2*/
+```
+
+**(2)** Select authors for 2 selected books using SQL `IN` operator
+```sql
+SELECT authors0_.book_with_batch_size_id AS book_wit1_6_1_,
+       authors0_.authors_id              AS authors_2_6_1_,
+       author1_.id                       AS id1_0_0_,
+       author1_.full_name                AS full_nam2_0_0_
+FROM   book_with_batch_size_authors authors0_
+       INNER JOIN author author1_
+               ON authors0_.authors_id = author1_.id
+WHERE  authors0_.book_with_batch_size_id IN ( ?, ? ) /*11,12*/
+```
+
+**(3)** Lazily select categories for 2 selected books after the first access to categories collection of any entity from the result set
+```sql
+SELECT categories0_.book_with_batch_size_id AS book_wit1_7_1_,
+       categories0_.categories_id           AS categori2_7_1_,
+       category1_.id                        AS id1_20_0_,
+       category1_.NAME                      AS name2_20_0_
+FROM   book_with_batch_size_categories categories0_
+       INNER JOIN category category1_
+               ON categories0_.categories_id = category1_.id
+WHERE  categories0_.book_with_batch_size_id IN ( ?, ? ) /*12,11*/
+```
 
 ##### <a name="1049387d75c060dc77f67c5477fb48d4"></a>Entity with multiple bags resulting in `MultipleBagFetchException`
 
@@ -1997,53 +2048,60 @@ void implicitOptimisticLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-2. Suspending current transaction #1, creating new transaction #2:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-3. Initiating transaction #2 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*9*/
-           number_of_ratings = ?, /*241*/
-           rating = ?, /*4.50*/
-           version = ? /*1*/
-    WHERE  id = ? /*10*/
-           AND version = ? /*0*/
-    ```
-4. Resuming suspended transaction #1 after completion of inner transaction #2
-5. Initiating transaction #1 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*9*/
-           number_of_ratings = ?, /*241*/
-           rating = ?, /*4.60*/
-           version = ? /*1*/
-    WHERE  id = ? /*10*/
-           AND version = ? /*0*/
-    ```
-6. Optimistic locking failed; nested exception is `org.hibernate.StaleObjectStateException`: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect)
-7. Initiating transaction #1 rollback after commit exception
+
+**(1)** Creating new transaction #1
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(2)** Suspending current transaction #1, creating new transaction #2
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(3)** Initiating transaction #2 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*9*/
+       number_of_ratings = ?, /*241*/
+       rating = ?, /*4.50*/
+       version = ? /*1*/
+WHERE  id = ? /*10*/
+       AND version = ? /*0*/
+```
+
+**(4)** Resuming suspended transaction #1 after completion of inner transaction #2
+
+**(5)** Initiating transaction #1 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*9*/
+       number_of_ratings = ?, /*241*/
+       rating = ?, /*4.60*/
+       version = ? /*1*/
+WHERE  id = ? /*10*/
+       AND version = ? /*0*/
+```
+
+**(6)** Optimistic locking failed; nested exception is `org.hibernate.StaleObjectStateException` Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect)
+
+**(7)** Initiating transaction #1 rollback after commit exception
 
 ##### <a name="502c2256dbc0a223143500d9f9b3b5cc"></a>Explicit optimistic lock `@Lock(OPTIMISTIC)`
 
@@ -2095,49 +2153,56 @@ void explicitOptimisticLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-2. Suspending current transaction #1, creating new transaction #2:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-3. Initiating transaction #2 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*9*/
-           number_of_ratings = ?, /*241*/
-           rating = ?, /*4.50*/
-           version = ? /*1*/
-    WHERE  id = ? /*6*/
-           AND version = ? /*0*/
-    ```
-4. Resuming suspended transaction #1 after completion of inner transaction #2
-5. Initiating transaction #1 commit:
-    ```sql
-    SELECT version
-    FROM   book_rating
-    WHERE  id = ? /*6*/
-    ```
-6. Optimistic locking failed; nested exception is `org.hibernate.OptimisticLockException`
-7. Initiating transaction #1 rollback after commit exception
+
+**(1)** Creating new transaction #1
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(2)** Suspending current transaction #1, creating new transaction #2
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(3)** Initiating transaction #2 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*9*/
+       number_of_ratings = ?, /*241*/
+       rating = ?, /*4.50*/
+       version = ? /*1*/
+WHERE  id = ? /*6*/
+       AND version = ? /*0*/
+```
+
+**(4)** Resuming suspended transaction #1 after completion of inner transaction #2
+
+**(5)** Initiating transaction #1 commit
+```sql
+SELECT version
+FROM   book_rating
+WHERE  id = ? /*6*/
+```
+
+**(6)** Optimistic locking failed; nested exception is `org.hibernate.OptimisticLockException`
+
+**(7)** Initiating transaction #1 rollback after commit exception
 
 ##### <a name="6efaef54090120ae008692898745a547"></a>Explicit optimistic lock `@Lock(OPTIMISTIC_FORCE_INCREMENT)`
 
@@ -2186,50 +2251,57 @@ void explicitOptimisticForceIncrementLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-2. Suspending current transaction #1, creating new transaction #2:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           LEFT OUTER JOIN book book1_
-                        ON bookrating0_.book_id = book1_.id
-    WHERE  book1_.isbn = ? /*007-6092019909*/
-    ```
-3. Initiating transaction #2 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*9*/
-           number_of_ratings = ?, /*241*/
-           rating = ?, /*4.50*/
-           version = ? /*1*/
-    WHERE  id = ? /*4*/
-           AND version = ? /*0*/
-    ```
-4. Resuming suspended transaction #1 after completion of inner transaction #2
-5. Initiating transaction #1 commit:
-    ```sql
-    UPDATE book_rating
-    SET    version = ? /*1*/
-    WHERE  id = ? /*4*/
-           AND version = ? /*0*/
-    ```
-6. Optimistic locking failed; nested exception is `org.hibernate.StaleObjectStateException`: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect)
-7. Initiating transaction #1 rollback after commit exception
+
+**(1)** Creating new transaction #1
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(2)** Suspending current transaction #1, creating new transaction #2
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       LEFT OUTER JOIN book book1_
+                    ON bookrating0_.book_id = book1_.id
+WHERE  book1_.isbn = ? /*007-6092019909*/
+```
+
+**(3)** Initiating transaction #2 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*9*/
+       number_of_ratings = ?, /*241*/
+       rating = ?, /*4.50*/
+       version = ? /*1*/
+WHERE  id = ? /*4*/
+       AND version = ? /*0*/
+```
+
+**(4)** Resuming suspended transaction #1 after completion of inner transaction #2
+
+**(5)** Initiating transaction #1 commit
+```sql
+UPDATE book_rating
+SET    version = ? /*1*/
+WHERE  id = ? /*4*/
+       AND version = ? /*0*/
+```
+
+**(6)** Optimistic locking failed; nested exception is `org.hibernate.StaleObjectStateException` Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect)
+
+**(7)** Initiating transaction #1 rollback after commit exception
 
 ##### <a name="c2b4e4a7c69f6c6b216e05a547731c57"></a>Explicit pessimistic write lock `@Lock(PESSIMISTIC_WRITE)`
 
@@ -2288,52 +2360,56 @@ void explicitPessimisticWriteLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           CROSS JOIN book book1_
-    WHERE  bookrating0_.book_id = book1_.id
-           AND book1_.isbn = ? /*007-6092019909*/
-    FOR UPDATE OF bookrating0_
-    ```
-2. Initiating transaction #1 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*7*/
-           number_of_ratings = ?, /*241*/
-           rating = ?, /*4.60*/
-           version = ? /*1*/
-    WHERE  id = ? /*8*/
-           AND version = ? /*0*/ 
-    ```
-3. Creating new transaction #2:
-    ```sql
-    SELECT bookrating0_.id                AS id1_4_,
-           bookrating0_.book_id           AS book_id5_4_,
-           bookrating0_.number_of_ratings AS number_o2_4_,
-           bookrating0_.rating            AS rating3_4_,
-           bookrating0_.version           AS version4_4_
-    FROM   book_rating bookrating0_
-           CROSS JOIN book book1_
-    WHERE  bookrating0_.book_id = book1_.id
-           AND book1_.isbn = ? /*007-6092019909*/
-    FOR UPDATE OF bookrating0_
-    ```
-4. Initiating transaction #2 commit:
-    ```sql
-    UPDATE book_rating
-    SET    book_id = ?, /*7*/
-           number_of_ratings = ?, /*242*/
-           rating = ?, /*4.70*/
-           version = ? /*2*/
-    WHERE  id = ? /*8*/
-           AND version = ? /*1*/
-    ```
+
+**(1)** Creating new transaction #1
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       CROSS JOIN book book1_
+WHERE  bookrating0_.book_id = book1_.id
+       AND book1_.isbn = ? /*007-6092019909*/
+FOR UPDATE OF bookrating0_
+```
+
+**(2)** Initiating transaction #1 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*7*/
+       number_of_ratings = ?, /*241*/
+       rating = ?, /*4.60*/
+       version = ? /*1*/
+WHERE  id = ? /*8*/
+       AND version = ? /*0*/ 
+```
+
+**(3)** Creating new transaction #2
+```sql
+SELECT bookrating0_.id                AS id1_4_,
+       bookrating0_.book_id           AS book_id5_4_,
+       bookrating0_.number_of_ratings AS number_o2_4_,
+       bookrating0_.rating            AS rating3_4_,
+       bookrating0_.version           AS version4_4_
+FROM   book_rating bookrating0_
+       CROSS JOIN book book1_
+WHERE  bookrating0_.book_id = book1_.id
+       AND book1_.isbn = ? /*007-6092019909*/
+FOR UPDATE OF bookrating0_
+```
+
+**(4)** Initiating transaction #2 commit
+```sql
+UPDATE book_rating
+SET    book_id = ?, /*7*/
+       number_of_ratings = ?, /*242*/
+       rating = ?, /*4.70*/
+       version = ? /*2*/
+WHERE  id = ? /*8*/
+       AND version = ? /*1*/
+```
 
 ##### <a name="657a4b524b13a122706ee27f7675bcf7"></a>Explicit pessimistic read lock `@Lock(PESSIMISTIC_READ)`
 
@@ -2378,32 +2454,36 @@ void explicitPessimisticReadLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT     bookrating0_.id                AS id1_4_,
-               bookrating0_.book_id           AS book_id5_4_,
-               bookrating0_.number_of_ratings AS number_o2_4_,
-               bookrating0_.rating            AS rating3_4_,
-               bookrating0_.version           AS version4_4_
-    FROM       book_rating bookrating0_
-    CROSS JOIN book book1_
-    WHERE      bookrating0_.book_id=book1_.id
-    AND        book1_.isbn=? FOR share OF bookrating0_ /*007-6092019909*/
-    ```
-2. Suspending current transaction, creating new transaction #2:
-    ```sql
-    SELECT     bookrating0_.id                AS id1_4_,
-               bookrating0_.book_id           AS book_id5_4_,
-               bookrating0_.number_of_ratings AS number_o2_4_,
-               bookrating0_.rating            AS rating3_4_,
-               bookrating0_.version           AS version4_4_
-    FROM       book_rating bookrating0_
-    CROSS JOIN book book1_
-    WHERE      bookrating0_.book_id=book1_.id
-    AND        book1_.isbn=? FOR share OF bookrating0_ /*007-6092019909*/
-    ```
-3. Initiating transaction #1 commit
-4. Initiating transaction #2 commit
+
+**(1)** Creating new transaction #1
+```sql
+SELECT     bookrating0_.id                AS id1_4_,
+           bookrating0_.book_id           AS book_id5_4_,
+           bookrating0_.number_of_ratings AS number_o2_4_,
+           bookrating0_.rating            AS rating3_4_,
+           bookrating0_.version           AS version4_4_
+FROM       book_rating bookrating0_
+CROSS JOIN book book1_
+WHERE      bookrating0_.book_id=book1_.id
+AND        book1_.isbn=? FOR share OF bookrating0_ /*007-6092019909*/
+```
+
+**(2)** Suspending current transaction, creating new transaction #2
+```sql
+SELECT     bookrating0_.id                AS id1_4_,
+           bookrating0_.book_id           AS book_id5_4_,
+           bookrating0_.number_of_ratings AS number_o2_4_,
+           bookrating0_.rating            AS rating3_4_,
+           bookrating0_.version           AS version4_4_
+FROM       book_rating bookrating0_
+CROSS JOIN book book1_
+WHERE      bookrating0_.book_id=book1_.id
+AND        book1_.isbn=? FOR share OF bookrating0_ /*007-6092019909*/
+```
+
+**(3)** Initiating transaction #1 commit
+
+**(4)** Initiating transaction #2 commit
 
 #### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
@@ -2572,98 +2652,101 @@ void updateOneToManyRelations() {
 ```
 
 The following SQL queries are executed.
-1. Find by book ID:
-    ```sql
-    SELECT "book"."id"               AS "id",
-           "book"."isbn"             AS "isbn",
-           "book"."title"            AS "title",
-           "book"."publication_date" AS "publication_date"
-    FROM   "book"
-    WHERE  "book"."id" = ? /*2*/
-    ```
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ORDER  BY "book_key"
-    ```
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
-2. Remove one book author and save book:
-    ```sql
-    UPDATE "book"
-    SET    "isbn" = ?, /*978-0321200686*/
-           "title" = ?, /*Enterprise Integration Patterns*/
-           "publication_date" = ? /*2003-10-20 00:00:00.0*/
-    WHERE  "book"."id" = ? /*2*/
-    ```
-    ```sql
-    DELETE FROM "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
-    ```sql
-    DELETE FROM "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ```
-    ```sql
-    INSERT INTO "book_author"
-                ("author",
-                 "book",
-                 "book_key")
-    VALUES      (?, /*2*/
-                 ?, /*2*/
-                 ?) /*0*/
-    ```
-    ```sql
-    INSERT INTO "book_category"
-                ("book",
-                 "category")
-    VALUES      (?, /*2*/
-                 ?) /*1*/
-    ```
-    ```sql
-    INSERT INTO "book_category"
-                ("book",
-                 "category")
-    VALUES      (?, /*2*/
-                 ?) /*2*/
-    ```
-3. Remove one book category and save book:
-    ```sql
-    UPDATE "book"
-    SET    "isbn" = ?, /*978-0321200686*/
-           "title" = ?, /*Enterprise Integration Patterns*/
-           "publication_date" = ? /*2003-10-20 00:00:00.0*/
-    WHERE  "book"."id" = ? /*2*/
-    ```
-    ```sql
-    DELETE FROM "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
-    ```sql
-    DELETE FROM "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ```
-    ```sql
-    INSERT INTO "book_author"
-                ("author",
-                 "book",
-                 "book_key")
-    VALUES      (?, /*2*/
-                 ?, /*2*/
-                 ?) /*0*/
-    ```
-    ```sql
-    INSERT INTO "book_category"
-                ("book",
-                 "category")
-    VALUES      (?, /*2*/
-                 ?) /*1*/
-    ```
+
+**(1)** Find by book ID
+```sql
+SELECT "book"."id"               AS "id",
+       "book"."isbn"             AS "isbn",
+       "book"."title"            AS "title",
+       "book"."publication_date" AS "publication_date"
+FROM   "book"
+WHERE  "book"."id" = ? /*2*/
+```
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*2*/
+ORDER  BY "book_key"
+```
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*2*/
+```
+
+**(2)** Remove one book author and save book
+```sql
+UPDATE "book"
+SET    "isbn" = ?, /*978-0321200686*/
+       "title" = ?, /*Enterprise Integration Patterns*/
+       "publication_date" = ? /*2003-10-20 00:00:00.0*/
+WHERE  "book"."id" = ? /*2*/
+```
+```sql
+DELETE FROM "book_category"
+WHERE  "book_category"."book" = ? /*2*/
+```
+```sql
+DELETE FROM "book_author"
+WHERE  "book_author"."book" = ? /*2*/
+```
+```sql
+INSERT INTO "book_author"
+            ("author",
+              "book",
+              "book_key")
+VALUES      (?, /*2*/
+              ?, /*2*/
+              ?) /*0*/
+```
+```sql
+INSERT INTO "book_category"
+            ("book",
+              "category")
+VALUES      (?, /*2*/
+              ?) /*1*/
+```
+```sql
+INSERT INTO "book_category"
+            ("book",
+              "category")
+VALUES      (?, /*2*/
+              ?) /*2*/
+```
+
+**(3)** Remove one book category and save book
+```sql
+UPDATE "book"
+SET    "isbn" = ?, /*978-0321200686*/
+       "title" = ?, /*Enterprise Integration Patterns*/
+       "publication_date" = ? /*2003-10-20 00:00:00.0*/
+WHERE  "book"."id" = ? /*2*/
+```
+```sql
+DELETE FROM "book_category"
+WHERE  "book_category"."book" = ? /*2*/
+```
+```sql
+DELETE FROM "book_author"
+WHERE  "book_author"."book" = ? /*2*/
+```
+```sql
+INSERT INTO "book_author"
+            ("author",
+              "book",
+              "book_key")
+VALUES      (?, /*2*/
+              ?, /*2*/
+              ?) /*0*/
+```
+```sql
+INSERT INTO "book_category"
+            ("book",
+              "category")
+VALUES      (?, /*2*/
+              ?) /*1*/
+```
 
 ##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
@@ -2678,29 +2761,32 @@ void findById() {
 ```
 
 3 SQL queries are executed.
-1. Select book:
-    ```sql
-    SELECT "book"."id"               AS "id",
-           "book"."isbn"             AS "isbn",
-           "book"."title"            AS "title",
-           "book"."publication_date" AS "publication_date"
-    FROM   "book"
-    WHERE  "book"."id" = ? /*1*/
-    ```
-2. Select authors for the book:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*1*/
-    ORDER  BY "book_key"
-    ```
-3. Select categories for the book:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*1*/
-    ```
+
+**(1)** Select book
+```sql
+SELECT "book"."id"               AS "id",
+       "book"."isbn"             AS "isbn",
+       "book"."title"            AS "title",
+       "book"."publication_date" AS "publication_date"
+FROM   "book"
+WHERE  "book"."id" = ? /*1*/
+```
+
+**(2)** Select authors for the book
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*1*/
+ORDER  BY "book_key"
+```
+
+**(3)** Select categories for the book
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*1*/
+```
 
 ##### <a name="f34c8b22bd6fb5a16c60b7ecd412d675"></a>`PagingAndSortingRepository.findAll(Pageable)`
 
@@ -2721,35 +2807,39 @@ void findAllWithPageable() {
 ```
 
 Query selects 1 book, so 4 SQL queries are executed.
-1. Select the 1st book ordering by publication date:
-    ```sql
-    SELECT "book"."id"               AS "id",
-           "book"."isbn"             AS "isbn",
-           "book"."title"            AS "title",
-           "book"."publication_date" AS "publication_date"
-    FROM   "book"
-    ORDER  BY publication_date ASC
-    LIMIT  1 offset 0
-    ```
-2. Select authors for the book:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*1*/
-    ORDER  BY "book_key"
-    ```
-3. Select categories for the book:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*1*/
-    ```
-4. Count all books:
-    ```sql
-    SELECT Count(*)
-    FROM   "book"
-    ```
+
+**(1)** Select the 1st book ordering by publication date
+```sql
+SELECT "book"."id"               AS "id",
+       "book"."isbn"             AS "isbn",
+       "book"."title"            AS "title",
+       "book"."publication_date" AS "publication_date"
+FROM   "book"
+ORDER  BY publication_date ASC
+LIMIT  1 offset 0
+```
+
+**(2)** Select authors for the book
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*1*/
+ORDER  BY "book_key"
+```
+
+**(3)** Select categories for the book
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*1*/
+```
+
+**(4)** Count all books
+```sql
+SELECT Count(*)
+FROM   "book"
+```
 
 ##### <a name="ce75f4a17b574599267b2a18924cb931"></a>`@Query` with SQL
 
@@ -2777,41 +2867,46 @@ void queryMethod() {
 ```
 
 Query selects 2 books, so 5 SQL queries are executed.
-1. 
-    ```sql
-    SELECT *
-    FROM   book
-    WHERE  title LIKE Concat('%', ?, '%') /*Pattern*/
-    ORDER  BY publication_date
-    ```
-2. Select authors for the 1st book from the result set: 
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*1*/
-    ORDER  BY "book_key"
-    ```
-3. Select categories for the 1st book from the result set:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*1*/
-    ```
-4. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ORDER  BY "book_key"
-    ```
-5. Select categories for the 2nd book from the result set:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
+
+**(1)** Select books
+```sql
+SELECT *
+FROM   book
+WHERE  title LIKE Concat('%', ?, '%') /*Pattern*/
+ORDER  BY publication_date
+```
+
+**(2)** Select authors for the 1st book from the result set 
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*1*/
+ORDER  BY "book_key"
+```
+
+**(3)** Select categories for the 1st book from the result set
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*1*/
+```
+
+**(4)** Select authors for the 2nd book from the result set
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*2*/
+ORDER  BY "book_key"
+```
+
+**(5)** Select categories for the 2nd book from the result set
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*2*/
+```
 
 ##### <a name="ce75f4a17b574599267b2a18924cb931"></a>`@Query` with SQL join
 
@@ -2845,58 +2940,6 @@ void queryMethodWithJoin() {
 The EIP Book is present 2 times in the result list.
 Duplicate is caused by join of the EIP Book with 2 Authors.
 The POEAA Book has 1 author, so doesn't have duplicates in the result list.
-
-The following SQL queries are executed.
-1. Select book joining with authors:
-    ```sql
-    SELECT *
-    FROM   book b
-           LEFT JOIN book_author ba
-                  ON b.id = ba.book
-    WHERE  b.publication_date > ? /*2000-01-01 00:00:00.0*/
-    ```
-2. Select authors for the 1st book from the result set: 
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*1*/
-    ORDER  BY "book_key"
-    ```
-3. Select categories for the 1st book from the result set:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*1*/
-    ```
-4. Select authors for the 2nd book from the result set:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ORDER  BY "book_key"
-    ```
-5. Select categories for the 2nd book from the result set:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
-6. Select authors for the 2nd book (duplicate) from the result set:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ORDER  BY "book_key"
-    ```
-7. Select categories for the 2nd book (duplicate) from the result set:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
 
 ##### <a name="59581bf130250c31253eac07da3d2c56"></a>`@Query` with SQL and pagination
 
@@ -2937,33 +2980,37 @@ void queryMethodWithPagination() {
 ```
 
 Query selects 1 book, so 4 SQL queries are executed.
-1. Select book:
-    ```sql
-    SELECT   *
-    FROM     book
-    WHERE    title LIKE Concat('%', ?, '%') /*Pattern*/
-    ORDER BY publication_date offset ?FETCH next ? rows only /*1,1*/ 
-    ```
-2. Select authors for the book:
-    ```sql
-    SELECT "book_author"."author"   AS "author",
-           "book_author"."book_key" AS "book_key"
-    FROM   "book_author"
-    WHERE  "book_author"."book" = ? /*2*/
-    ORDER  BY "book_key" 
-    ```
-3. Select categories for the book:
-    ```sql
-    SELECT "book_category"."category" AS "category"
-    FROM   "book_category"
-    WHERE  "book_category"."book" = ? /*2*/
-    ```
-4. Count books:
-    ```sql
-    SELECT Count(*)
-    FROM   book
-    WHERE  title LIKE Concat('%', ?, '%') /*Pattern*/
-    ```
+
+**(1)** Select book
+```sql
+SELECT   *
+FROM     book
+WHERE    title LIKE Concat('%', ?, '%') /*Pattern*/
+ORDER BY publication_date offset ?FETCH next ? rows only /*1,1*/ 
+```
+
+**(2)** Select authors for the book
+```sql
+SELECT "book_author"."author"   AS "author",
+       "book_author"."book_key" AS "book_key"
+FROM   "book_author"
+WHERE  "book_author"."book" = ? /*2*/
+ORDER  BY "book_key" 
+```
+
+**(3)** Select categories for the book
+```sql
+SELECT "book_category"."category" AS "category"
+FROM   "book_category"
+WHERE  "book_category"."book" = ? /*2*/
+```
+
+**(4)** Count books
+```sql
+SELECT Count(*)
+FROM   book
+WHERE  title LIKE Concat('%', ?, '%') /*Pattern*/
+```
 
 #### <a name="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
 
@@ -3044,48 +3091,54 @@ void implicitOptimisticLock() {
 ```
 
 The following SQL queries are executed.
-1. Creating new transaction #1:
-    ```sql
-    SELECT "book_rating"."id"                AS "id",
-           "book_rating"."book"              AS "book",
-           "book_rating"."rating"            AS "rating",
-           "book_rating"."version"           AS "version",
-           "book_rating"."number_of_ratings" AS "number_of_ratings"
-    FROM   "book_rating"
-    WHERE  "book_rating"."id" = ? /*1*/
-    ```
-2. Suspending current transaction #1, creating new transaction #2:
-    ```sql
-    SELECT "book_rating"."id"                AS "id",
-           "book_rating"."book"              AS "book",
-           "book_rating"."rating"            AS "rating",
-           "book_rating"."version"           AS "version",
-           "book_rating"."number_of_ratings" AS "number_of_ratings"
-    FROM   "book_rating"
-    WHERE  "book_rating"."id" = ? /*1*/
-    ```
-    ```sql
-    UPDATE "book_rating"
-    SET    "version" = ?, /*2*/
-           "book" = ?, /*1*/
-           "rating" = ?, /*4.500*/
-           "number_of_ratings" = ? /*241*/
-    WHERE  "book_rating"."id" = ? /*1*/
-           AND "book_rating"."version" = ? /*1*/
-    ```
-3. Initiating transaction #2 commit
-4. Resuming suspended transaction #1 after completion of inner transaction #2
-    ```sql
-    UPDATE "book_rating"
-    SET    "version" = ?, /*2*/
-           "book" = ?, /*1*/
-           "rating" = ?, /*4.600*/
-           "number_of_ratings" = ? /*241*/
-    WHERE  "book_rating"."id" = ? /*1*/
-           AND "book_rating"."version" = ? /*1*/
-    ```
-5. Optimistic locking failed; nested exception is `org.springframework.dao.OptimisticLockingFailureException`
-6. Initiating transaction #1 rollback after exception
+
+**(1)** Creating new transaction #1
+```sql
+SELECT "book_rating"."id"                AS "id",
+       "book_rating"."book"              AS "book",
+       "book_rating"."rating"            AS "rating",
+       "book_rating"."version"           AS "version",
+       "book_rating"."number_of_ratings" AS "number_of_ratings"
+FROM   "book_rating"
+WHERE  "book_rating"."id" = ? /*1*/
+```
+
+**(2)** Suspending current transaction #1, creating new transaction #2
+```sql
+SELECT "book_rating"."id"                AS "id",
+       "book_rating"."book"              AS "book",
+       "book_rating"."rating"            AS "rating",
+       "book_rating"."version"           AS "version",
+       "book_rating"."number_of_ratings" AS "number_of_ratings"
+FROM   "book_rating"
+WHERE  "book_rating"."id" = ? /*1*/
+```
+```sql
+UPDATE "book_rating"
+SET    "version" = ?, /*2*/
+       "book" = ?, /*1*/
+       "rating" = ?, /*4.500*/
+       "number_of_ratings" = ? /*241*/
+WHERE  "book_rating"."id" = ? /*1*/
+       AND "book_rating"."version" = ? /*1*/
+```
+
+**(3)** Initiating transaction #2 commit
+
+**(4)** Resuming suspended transaction #1 after completion of inner transaction #2
+```sql
+UPDATE "book_rating"
+SET    "version" = ?, /*2*/
+       "book" = ?, /*1*/
+       "rating" = ?, /*4.600*/
+       "number_of_ratings" = ? /*241*/
+WHERE  "book_rating"."id" = ? /*1*/
+       AND "book_rating"."version" = ? /*1*/
+```
+
+**(5)** Optimistic locking failed; nested exception is `org.springframework.dao.OptimisticLockingFailureException`
+
+**(6)** Initiating transaction #1 rollback after exception
 
 #### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
@@ -3219,7 +3272,7 @@ void findById() {
 }
 ```
 
-A single SQL statement is executed:
+A single SQL statement is executed
 ```sql
 SELECT book.*
 FROM   book
@@ -3248,7 +3301,7 @@ void queryMethod() {
 }
 ```
 
-A single SQL statement is executed:
+A single SQL statement is executed
 ```sql
 SELECT book.id,
        book.isbn,
@@ -3306,19 +3359,21 @@ void queryMethodWithPagination() {
 ```
 
 2 SQL queries are executed.
-1. Select books:
-    ```sql
-    SELECT   *
-    FROM     book
-    WHERE    title LIKE Concat('%', :title, '%')
-    ORDER BY publication_date offset :startFETCH next :rowCount rows only 
-    ```
-2. Count books:
-    ```sql
-    SELECT Count(*)
-    FROM   book
-    WHERE  title LIKE Concat('%', :title, '%')
-    ```
+
+**(1)** Select books
+```sql
+SELECT   *
+FROM     book
+WHERE    title LIKE Concat('%', :title, '%')
+ORDER BY publication_date offset :startFETCH next :rowCount rows only 
+```
+
+**(2)** Count books
+```sql
+SELECT Count(*)
+FROM   book
+WHERE  title LIKE Concat('%', :title, '%')
+```
 
 ##### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
