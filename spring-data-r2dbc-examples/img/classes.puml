@@ -1,0 +1,37 @@
+@startuml
+
+Book <-- BookAuthor
+Book <-- BookCategory
+Author <-- BookAuthor
+Category <-- BookCategory
+
+class Book {
+-id : Long
+-isbn : String
+-title : String
+-publicationDate : LocalDate
+}
+
+class BookAuthor {
+-id : Long
+-book : Long
+-author : Long
+}
+
+class BookCategory {
+-id : Long
+-book : Long
+-category : Long
+}
+
+class Author {
+-id : Long
+-fullName : String
+}
+
+class Category {
+-id : Long
+-name : String
+}
+
+@enduml

@@ -1,0 +1,67 @@
+/*
+ * Copyright 2020 Evgeniy Khyst
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${spring_boot_version}"
+    id 'io.spring.dependency-management' version "${spring_dependency_management_version}"
+}
+
+group = 'com.example.spring-data-jdbc'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    testCompileOnly {
+        extendsFrom testAnnotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.spring.io/libs-milestone'
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot.experimental:spring-boot-bom-r2dbc:0.1.0.M3'
+        mavenBom 'org.springframework.data:spring-data-releasetrain:Neumann-RC1'
+    }
+}
+
+dependencies {
+    implementation "org.springframework.boot.experimental:spring-boot-starter-data-r2dbc"
+    implementation "io.r2dbc:r2dbc-postgresql"
+    implementation "org.mapstruct:mapstruct:${mapstruct_version}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstruct_version}"
+    annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'org.springframework.boot.experimental:spring-boot-test-autoconfigure-r2dbc'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation "org.testcontainers:testcontainers:${testcontainers_version}"
+    testImplementation "org.testcontainers:postgresql:${testcontainers_version}"
+}
+
+test {
+    useJUnitPlatform()
+}
