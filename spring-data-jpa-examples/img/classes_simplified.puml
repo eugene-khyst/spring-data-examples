@@ -1,0 +1,34 @@
+@startuml
+
+Book o-- Author
+Book o-- Category
+Book o-- BookRating
+
+class Book {
+-id : Long
+-isbn : String
+-title : String
+-publicationDate : LocalDate
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class Author {
+-id : Long
+-fullName : String
+}
+
+class Category {
+-id : Long
+-name : String
+}
+
+class BookRating {
+-id : Long
+-version : int
+-book : Book
+-rating : BigDecimal
+-numberOfRatings : int
+}
+
+@enduml

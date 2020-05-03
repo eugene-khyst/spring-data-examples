@@ -1,0 +1,57 @@
+@startuml
+
+hide circle
+
+skinparam linetype ortho
+
+entity "CATEGORY" as c {
+  *ID : SERIAL <<PK1>>
+  --
+  *NAME : VARCHAR(255) <<U1,NN>>
+}
+
+entity "AUTHOR" as a {
+  *ID : SERIAL <<PK1>>
+  --
+  *FULL_NAME : VARCHAR(255) <<U1,NN>>
+}
+
+entity "BOOK" as b {
+  *ID : SERIAL <<PK1>>
+  --
+  *ISBN : VARCHAR(14) <<U1>>
+  *TITLE : VARCHAR(255) <<NN>>
+  *PUBLICATION_DATE : DATE <<NN>>
+}
+
+entity "BOOK_CATEGORY" as bc {
+  *ID : SERIAL <<PK1>>
+  --
+  *BOOK : INTEGER <<FK1,U1>>
+  *CATEGORY : INTEGER <<FK2,U1>>
+}
+
+entity "BOOK_AUTHOR" as ba {
+  *ID : SERIAL <<PK1>>
+  --
+  *BOOK : INTEGER <<FK1,U1>>
+  *AUTHOR : INTEGER <<FK2,U1>>
+}
+
+entity "BOOK_RATING" as br {
+  *ID : SERIAL <<PK1>>,
+  --
+  *VERSION : INTEGER <<NN>>
+  *BOOK : INTEGER <<FK1,NN>>
+  *RATING : NUMERIC(4, 3) <<NN>>
+  *NUMBER_OF_RATINGS : INTEGER <<NN>>
+}
+
+b ||..|{ bc
+b ||..|{ ba
+b ||..o| br
+
+c ||..|{ bc
+a ||..|{ ba
+
+@enduml

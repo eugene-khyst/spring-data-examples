@@ -1,0 +1,111 @@
+@startuml
+
+
+
+abstract class AbstractBook
+
+AbstractBook <|-- Book
+AbstractBook <|-- BookWithFetchModeJoin
+AbstractBook <|-- BookWithFetchModeSelect
+AbstractBook <|-- BookWithFetchModeSubselect
+AbstractBook <|-- BookWithBatchSize
+
+Book o-- Author
+BookWithFetchModeJoin o-- Author
+BookWithFetchModeSelect o-- Author
+BookWithFetchModeSubselect o-- Author
+BookWithBatchSize o-- Author
+BookWithMultipleBags o-- Author
+
+Book o-- Category
+BookWithFetchModeJoin o-- Category
+BookWithFetchModeSelect o-- Category
+BookWithFetchModeSubselect o-- Category
+BookWithBatchSize o-- Category
+BookWithMultipleBags o-- Category
+
+Book o--- BookRating
+
+abstract class AbstractBook {
+-id : Long
+-isbn : String
+-title : String
+-publicationDate : LocalDate
+{abstract} +List<Author> getAuthors()
+{abstract} +setAuthors(List<Author> authors)
+{abstract} +Set<Category> getCategories()
+{abstract} +setCategories(Set<Category> categories)
+}
+
+class Author {
+-id : Long
+-fullName : String
+}
+
+class Category {
+-id : Long
+-name : String
+}
+
+class Book {
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class BookWithFetchModeJoin {
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class BookWithFetchModeSelect {
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class BookWithFetchModeSubselect {
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class BookWithBatchSize {
+-authors : List<Author>
+-categories : Set<Category>
+}
+
+class BookWithMultipleBags {
+-id : Long
+-isbn : String
+-title : String
+-publicationDate : LocalDate
+-authors : List<Author>
+-categories : List<Category>
+}
+
+class BookRating {
+-id : Long
+-version : int
+-book : Book
+-rating : BigDecimal
+-numberOfRatings : int
+}
+
+note top of AbstractBook : @MappedSuperclass
+note top of Book : No explicit FetchMode
+note top of BookWithFetchModeJoin : @Fetch(JOIN)
+note top of BookWithFetchModeSelect : @Fetch(SELECT)
+note top of BookWithFetchModeSubselect : @Fetch(SUBSELECT)
+note top of BookWithBatchSize : @BatchSize(size = 2)
+note top of BookWithMultipleBags : MultipleBagFetchException:\ncannot simultaneously fetch multiple bags
+
+note "@ManyToMany(fetch = EAGER) authors\n@ManyToMany(fetch = LAZY) categories" as FetchType
+
+Book ... FetchType
+BookWithFetchModeJoin ... FetchType
+BookWithFetchModeSelect ... FetchType
+BookWithFetchModeSubselect ... FetchType
+BookWithBatchSize ... FetchType
+BookWithMultipleBags ... FetchType
+
+note top of BookRating : @Version
+
+@enduml
