@@ -26,6 +26,38 @@ for (const match of Array.from(matches).reverse()) {
   toc.unshift(`${'  '.repeat(level.length - 2)}* [${title}](#${hash})`);
 }
 
+const lines = data.split(/\r?\n/);
+let matched = false;
+let tocStart = -1;
+let tocEnd = -1;
+for (let i = 0; i < lines.length; i++) {
+  const line = lines[i];
+  if (line.match(/^\s*\*\s+\[.+\]\(#\w+\)$/)) {
+    if (!matched) {
+      tocStart = i;
+    }
+    matched = true;
+  } else {
+    if (matched) {
+      if (line.match(/^\s*$/)) {
+        tocEnd = i + 1;
+      } else {
+        tocEnd = i;
+      }
+      break;
+    }
+  }
+  i++;
+}
+
+lines.splice(tocStart, tocEnd - tocStart);
+
+data = '';
+for (let i = 0; i < lines.length; i++) {
+  const line = lines[i];
+  data += line + os.EOL;
+}
+
 const match = /#\s+.+(\r?\n)/.exec(data);
 data = insert(data, match.index + match[0].length, 0, os.EOL + toc.join(os.EOL) + os.EOL);
 
