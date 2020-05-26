@@ -1,5 +1,6 @@
 # Spring Data JPA pitfalls and modern alternatives: Spring Data JDBC and Spring Data R2DBC
 
+* [Overview](#3b878279a04dc47d60932cb294d96259)
 * [Spring Data JPA](#810bf4be9fd3907b3e5cff790716a958)
   * [Fetching strategies](#75e0f07fedd63771fc35ec852a9c937f)
   * [Locking strategies](#9a3347442ef97064c198bda69c16f816)
@@ -61,6 +62,13 @@
     * [`@Query` with SQL and pagination](#59581bf130250c31253eac07da3d2c56)
     * [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
 
+## <a name="3b878279a04dc47d60932cb294d96259"></a>Overview
+
+These examples demonstrates some common JPA pitfalls and evaluates alternatives from the Spring Data family:
+* [spring-data-jpa-examples](spring-data-jpa-examples/) - some of common JPA pitfalls
+* [spring-data-jdbc-examples](spring-data-jdbc-examples/) - Spring Data JDBC as a simpler alternative inspired by Domain-Driven Design
+* [spring-data-r2dbc-examples](spring-data-r2dbc-examples/) - Spring Data R2DBC for reactive database connectivity
+
 Spring Data is a family of libraries aiming to simplify the implementation of a data access layer for Spring-based applications by reducing boilerplate code. 
 Spring Data makes it easy to implement a Repository for accessing persistent entities in the underlying data store.
 Spring Data JPA allows to build repositories based on JPA.
@@ -77,11 +85,6 @@ detaching and merging entities, first-level cache, lazy loading, dirty checking,
 More importantly, in the JPA, many DB calls are made behind the scenes.
 A simple query sometimes leads to multiple SQL queries to a DB.
 In its turn, too many SQL queries leads to performance problems.
-
-These examples demonstrates some common JPA pitfalls and evaluates alternatives from the Spring Data family:
-* [spring-data-jpa-examples](spring-data-jpa-examples/) - some of common JPA pitfalls
-* [spring-data-jdbc-examples](spring-data-jdbc-examples/) - Spring Data JDBC as a simpler alternative inspired by Domain-Driven Design
-* [spring-data-r2dbc-examples](spring-data-r2dbc-examples/) - Spring Data R2DBC for reactive database connectivity
 
 ## <a name="810bf4be9fd3907b3e5cff790716a958"></a>Spring Data JPA
 
@@ -3474,6 +3477,7 @@ void mapToDto() {
       .verifyComplete();
 }
 ```
+
 
 
 
