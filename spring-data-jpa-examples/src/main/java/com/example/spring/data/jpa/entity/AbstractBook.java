@@ -16,29 +16,26 @@
 
 package com.example.spring.data.jpa.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.NaturalId;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.NaturalId;
 
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class AbstractBook implements Serializable {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
 
-  @NaturalId
-  @EqualsAndHashCode.Include
-  private String isbn;
+  @NaturalId @EqualsAndHashCode.Include private String isbn;
 
   private String title;
 

@@ -23,10 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-class BookWithBatchSizeRepositoryTest extends AbstractBookRepositoryBaseTest<BookWithBatchSize> {
+class BookWithBatchSizeRepositoryTest extends AbstractBookRepositoryTest<BookWithBatchSize> {
 
-  @Autowired
-  private BookWithBatchSizeRepository bookRepository;
+  @Autowired private BookWithBatchSizeRepository bookRepository;
 
   @Override
   BookWithBatchSize createBook() {

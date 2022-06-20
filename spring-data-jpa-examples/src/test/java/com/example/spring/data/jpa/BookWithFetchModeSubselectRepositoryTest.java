@@ -22,10 +22,9 @@ import com.example.spring.data.jpa.repository.BookWithFetchModeSubselectReposito
 import org.springframework.beans.factory.annotation.Autowired;
 
 class BookWithFetchModeSubselectRepositoryTest
-    extends AbstractBookRepositoryBaseTest<BookWithFetchModeSubselect> {
+    extends AbstractBookRepositoryTest<BookWithFetchModeSubselect> {
 
-  @Autowired
-  private BookWithFetchModeSubselectRepository bookRepository;
+  @Autowired private BookWithFetchModeSubselectRepository bookRepository;
 
   @Override
   BookWithFetchModeSubselect createBook() {

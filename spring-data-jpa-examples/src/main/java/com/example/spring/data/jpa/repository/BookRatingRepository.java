@@ -16,15 +16,12 @@
 
 package com.example.spring.data.jpa.repository;
 
-import static javax.persistence.LockModeType.OPTIMISTIC;
-import static javax.persistence.LockModeType.OPTIMISTIC_FORCE_INCREMENT;
-import static javax.persistence.LockModeType.PESSIMISTIC_READ;
-import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
-
 import com.example.spring.data.jpa.entity.BookRating;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+
+import static javax.persistence.LockModeType.*;
 
 public interface BookRatingRepository extends JpaRepository<BookRating, Long> {
 

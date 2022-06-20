@@ -1,0 +1,17 @@
+@startuml
+participant "Transaction 1" as TX1
+database    Database      as DB
+participant "Transaction 2" as TX2
+note across: ""upperLimit = (databaseValue * incrementSize) + 1""\n""lowerLimit = upperLimit - incrementSize""\n""id ∈ [lowerLimit, upperLimit)""
+TX1 -> DB : Begin transaction
+TX2 -> DB : Begin transaction
+note over DB: test
+TX1 -> DB : ""SELECT * FROM tbl WHERE id=1""\nversion = 1
+TX2 -> DB : ""SELECT * FROM tbl WHERE id=1""\nversion = 1
+TX1 -> DB : ""UPDATE tbl SET val='new val', version=2""\n"" WHERE id=1 AND version=1""
+TX2 -> DB : ""UPDATE tbl SET val='new val', version=2""\n"" WHERE id=1 AND version=1""\nWaiting to obtain update lock...\nWaiting to obtain update lock...
+TX1 -> DB : Commit the transaction
+TX2 -> DB : No rows were updated\nbecause version = 2 after the commit\nof the first transaction
+TX2 -> TX2 : An optimistic locking exception\n is raised
+TX2 -> DB : Rollback the transaction
+@enduml

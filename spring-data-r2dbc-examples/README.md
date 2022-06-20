@@ -8,8 +8,8 @@ Spring Data R2DBC used together with Spring WebFlux allows to develop fully-reac
 
 ## Prerequisites
 
-* JDK 11
-* Docker at least 1.6.0
+* JDK 17
+* Docker or Podman (see https://github.com/evgeniy-khist/podman-testcontainers)
 
 ## How to run tests
 

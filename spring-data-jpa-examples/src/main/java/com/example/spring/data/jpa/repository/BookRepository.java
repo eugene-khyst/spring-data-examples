@@ -17,15 +17,15 @@
 package com.example.spring.data.jpa.repository;
 
 import com.example.spring.data.jpa.entity.Book;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 
-public interface BookRepository
-    extends AbstractBookRepository<Book>, BookRepositoryCustom {
+import java.time.LocalDate;
+import java.util.List;
+
+public interface BookRepository extends AbstractBookRepository<Book>, BookRepositoryCustom {
 
   @EntityGraph("Book.authors")
   List<Book> findByPublicationDateAfter(LocalDate date, Sort sort);
@@ -36,13 +36,15 @@ public interface BookRepository
   @EntityGraph("Book.authors-categories")
   List<Book> findByPublicationDateBetween(LocalDate startDate, LocalDate endDate, Sort sort);
 
-  @Query("select b from Book b join fetch b.authors"
-      + " where b.publicationDate > :date"
-      + " order by b.publicationDate asc")
+  @Query(
+      "select b from Book b join fetch b.authors"
+          + " where b.publicationDate > :date"
+          + " order by b.publicationDate asc")
   List<Book> findByPublicationDateAfterJoinFetch(LocalDate date);
 
-@Query("select distinct b from Book b join fetch b.authors"
-    + " where b.publicationDate > :date"
-    + " order by b.publicationDate asc")
-List<Book> findByPublicationDateAfterJoinFetchDistinct(LocalDate date);
+  @Query(
+      "select distinct b from Book b join fetch b.authors"
+          + " where b.publicationDate > :date"
+          + " order by b.publicationDate asc")
+  List<Book> findByPublicationDateAfterJoinFetchDistinct(LocalDate date);
 }

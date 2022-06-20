@@ -1,21 +1,11 @@
 package com.example.spring.data.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.atIndex;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
-import static org.springframework.data.domain.Sort.Direction.DESC;
-
 import com.example.spring.data.jpa.entity.AbstractBook;
 import com.example.spring.data.jpa.entity.Author;
 import com.example.spring.data.jpa.entity.Category;
 import com.example.spring.data.jpa.repository.AbstractBookRepository;
 import com.example.spring.data.jpa.repository.AuthorRepository;
 import com.example.spring.data.jpa.repository.CategoryRepository;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,22 +21,30 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static org.springframework.data.domain.Sort.Direction.DESC;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(PER_CLASS)
 @DataJpaTest(showSql = false)
 @AutoConfigureTestDatabase(replace = NONE)
 @Transactional
 @Rollback(false)
-@Import(ProxyDataSourceConfig.class)
+@Import(DatasourceProxyBeanPostProcessor.class)
 @Slf4j
-abstract class AbstractBookRepositoryBaseTest<T extends AbstractBook>
-    extends AbstractContainerBaseTest {
+abstract class AbstractBookRepositoryTest<T extends AbstractBook> extends BaseIntegrationTest {
 
-  @Autowired
-  CategoryRepository categoryRepository;
+  @Autowired CategoryRepository categoryRepository;
 
-  @Autowired
-  AuthorRepository authorRepository;
+  @Autowired AuthorRepository authorRepository;
 
   Category softwareDevelopment;
   Category systemDesign;
@@ -92,9 +90,15 @@ abstract class AbstractBookRepositoryBaseTest<T extends AbstractBook>
     gregorHohpe = new Author("Gregor Hohpe");
     bobbyWoolf = new Author("Bobby Woolf");
 
-    authorRepository.saveAll(List.of(
-        erichGamma, richardHelm, ralphJohnson, johnVlissides,
-        martinFowler, gregorHohpe, bobbyWoolf));
+    authorRepository.saveAll(
+        List.of(
+            erichGamma,
+            richardHelm,
+            ralphJohnson,
+            johnVlissides,
+            martinFowler,
+            gregorHohpe,
+            bobbyWoolf));
   }
 
   void saveBooks() {
@@ -142,8 +146,9 @@ abstract class AbstractBookRepositoryBaseTest<T extends AbstractBook>
   void queryMethod() {
     log.info("Query method");
 
-    List<T> books = getBookRepository()
-        .findByTitleContains("Pattern", PageRequest.of(0, 2, DESC, "publicationDate"));
+    List<T> books =
+        getBookRepository()
+            .findByTitleContains("Pattern", PageRequest.of(0, 2, DESC, "publicationDate"));
     log.info("Books were loaded");
     assertThat(books)
         .hasSize(2)

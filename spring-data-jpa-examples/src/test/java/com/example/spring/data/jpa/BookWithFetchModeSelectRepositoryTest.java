@@ -22,10 +22,9 @@ import com.example.spring.data.jpa.repository.BookWithFetchModeSelectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class BookWithFetchModeSelectRepositoryTest
-    extends AbstractBookRepositoryBaseTest<BookWithFetchModeSelect> {
+    extends AbstractBookRepositoryTest<BookWithFetchModeSelect> {
 
-  @Autowired
-  private BookWithFetchModeSelectRepository bookRepository;
+  @Autowired private BookWithFetchModeSelectRepository bookRepository;
 
   @Override
   BookWithFetchModeSelect createBook() {

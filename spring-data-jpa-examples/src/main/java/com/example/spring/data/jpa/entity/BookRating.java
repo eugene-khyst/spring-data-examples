@@ -16,29 +16,22 @@
 
 package com.example.spring.data.jpa.entity;
 
-import static javax.persistence.FetchType.LAZY;
-
-import java.math.BigDecimal;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class BookRating {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
 
-  @Version
-  private int version;
+  @Version private int version;
 
   @OneToOne(fetch = LAZY)
   @JoinColumn(unique = true)

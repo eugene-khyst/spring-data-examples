@@ -18,6 +18,4 @@ package com.example.spring.data.jpa.repository;
 
 import com.example.spring.data.jpa.entity.BookWithBatchSize;
 
-public interface BookWithBatchSizeRepository extends AbstractBookRepository<BookWithBatchSize> {
-
-}
+public interface BookWithBatchSizeRepository extends AbstractBookRepository<BookWithBatchSize> {}

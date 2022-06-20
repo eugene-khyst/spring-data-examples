@@ -16,22 +16,22 @@
 
 package com.example.spring.data.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.example.spring.data.jpa.entity.BookWithFetchModeJoin;
 import com.example.spring.data.jpa.repository.AbstractBookRepository;
 import com.example.spring.data.jpa.repository.BookWithFetchModeJoinRepository;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @Slf4j
 class BookWithFetchModeJoinRepositoryTest
-    extends AbstractBookRepositoryBaseTest<BookWithFetchModeJoin> {
+    extends AbstractBookRepositoryTest<BookWithFetchModeJoin> {
 
-  @Autowired
-  private BookWithFetchModeJoinRepository bookRepository;
+  @Autowired private BookWithFetchModeJoinRepository bookRepository;
 
   @Override
   BookWithFetchModeJoin createBook() {
@@ -53,17 +53,21 @@ class BookWithFetchModeJoinRepositoryTest
 
     log.info("Books were loaded");
 
-    //Due to the issue https://hibernate.atlassian.net/browse/HHH-13740
-    //List<Author> authors has duplicates:
-    assertThat(poeaa).hasValueSatisfying(book ->
-        assertThat(book.getAuthors())
-            .hasSize(2)
-            .containsExactlyInAnyOrder(martinFowler, martinFowler));
+    // Due to the issue https://hibernate.atlassian.net/browse/HHH-13740
+    // List<Author> authors has duplicates:
+    assertThat(poeaa)
+        .hasValueSatisfying(
+            book ->
+                assertThat(book.getAuthors())
+                    .hasSize(2)
+                    .containsExactlyInAnyOrder(martinFowler, martinFowler));
 
-    assertThat(eip).hasValueSatisfying(book ->
-        assertThat(book.getAuthors())
-            .hasSize(4)
-            .containsExactlyInAnyOrder(gregorHohpe, gregorHohpe, bobbyWoolf, bobbyWoolf));
-    //For more details see the <Git repo>/HHH-13740/README.md
+    assertThat(eip)
+        .hasValueSatisfying(
+            book ->
+                assertThat(book.getAuthors())
+                    .hasSize(4)
+                    .containsExactlyInAnyOrder(gregorHohpe, gregorHohpe, bobbyWoolf, bobbyWoolf));
+    // For more details see the <Git repo>/HHH-13740/README.md
   }
 }

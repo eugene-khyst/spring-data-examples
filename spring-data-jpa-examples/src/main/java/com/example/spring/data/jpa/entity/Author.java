@@ -16,30 +16,40 @@
 
 package com.example.spring.data.jpa.entity;
 
-import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.NaturalId;
+import java.io.Serializable;
 
 @Entity
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Author implements Serializable {
 
-  @Id
-  @GeneratedValue
+  @Id @GeneratedValue
+  //  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NaturalId
-  @EqualsAndHashCode.Include
   private String fullName;
 
   public Author(String fullName) {
     this.fullName = fullName;
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Author other = (Author) obj;
+    return id != null && id.equals(other.id);
   }
 }

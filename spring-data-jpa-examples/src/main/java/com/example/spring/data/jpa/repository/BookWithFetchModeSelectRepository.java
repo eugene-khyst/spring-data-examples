@@ -19,6 +19,4 @@ package com.example.spring.data.jpa.repository;
 import com.example.spring.data.jpa.entity.BookWithFetchModeSelect;
 
 public interface BookWithFetchModeSelectRepository
-    extends AbstractBookRepository<BookWithFetchModeSelect> {
-
-}
+    extends AbstractBookRepository<BookWithFetchModeSelect> {}

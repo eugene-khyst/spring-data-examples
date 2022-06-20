@@ -16,14 +16,15 @@
 
 package com.example.spring.data.jpa.entity;
 
-import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
 @Data
@@ -31,13 +32,9 @@ import org.hibernate.annotations.NaturalId;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Category implements Serializable {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
 
-  @NaturalId
-  @EqualsAndHashCode.Include
-  private String name;
+  @NaturalId @EqualsAndHashCode.Include private String name;
 
   public Category(String name) {
     this.name = name;

@@ -16,23 +16,14 @@
 
 package com.example.spring.data.jpa;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
-import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
-
 import com.example.spring.data.jpa.entity.Book;
 import com.example.spring.data.jpa.entity.BookRating;
 import com.example.spring.data.jpa.repository.BookRatingRepository;
 import com.example.spring.data.jpa.repository.BookRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.OptimisticLockException;
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.StaleStateException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,24 +41,32 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(PER_CLASS)
 @DataJpaTest(showSql = false)
 @AutoConfigureTestDatabase(replace = NONE)
 @Transactional
 @Rollback(false)
-@Import(ProxyDataSourceConfig.class)
+@Import(DatasourceProxyBeanPostProcessor.class)
 @Slf4j
-class BookRatingRepositoryTest extends AbstractContainerBaseTest {
+class BookRatingRepositoryTest extends BaseIntegrationTest {
 
-  @Autowired
-  private BookRepository bookRepository;
+  @Autowired private BookRepository bookRepository;
 
-  @Autowired
-  private BookRatingRepository bookRatingRepository;
+  @Autowired private BookRatingRepository bookRatingRepository;
 
-  @Autowired
-  private TransactionTemplate txTemplate;
+  @Autowired private TransactionTemplate txTemplate;
 
   private Book book;
   private BookRating rating;
@@ -76,19 +75,20 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
   void setUp() {
     txTemplate.setPropagationBehavior(PROPAGATION_REQUIRES_NEW);
 
-    doInNewTransaction(() -> {
-      book = new Book();
-      book.setIsbn("007-6092019909");
-      book.setTitle("Patterns of Enterprise Application Architecture");
-      book.setPublicationDate(LocalDate.parse("2002-11-15"));
-      bookRepository.save(book);
+    doInNewTransaction(
+        () -> {
+          book = new Book();
+          book.setIsbn("007-6092019909");
+          book.setTitle("Patterns of Enterprise Application Architecture");
+          book.setPublicationDate(LocalDate.parse("2002-11-15"));
+          bookRepository.save(book);
 
-      rating = new BookRating();
-      rating.setBook(book);
-      rating.setRating(new BigDecimal("4.4"));
-      rating.setNumberOfRatings(240);
-      bookRatingRepository.save(rating);
-    });
+          rating = new BookRating();
+          rating.setBook(book);
+          rating.setRating(new BigDecimal("4.4"));
+          rating.setNumberOfRatings(240);
+          bookRatingRepository.save(rating);
+        });
   }
 
   @AfterEach
@@ -101,26 +101,31 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
   void implicitOptimisticLock() {
     log.info("@Version and StaleObjectStateException");
 
-    assertThatThrownBy(() ->
-        doInNewTransaction(() -> {
-          BookRating ratingTx1 = bookRatingRepository.findByBookIsbn(this.book.getIsbn());
+    assertThatThrownBy(
+            () ->
+                doInNewTransaction(
+                    () -> {
+                      BookRating ratingTx1 =
+                          bookRatingRepository.findByBookIsbn(this.book.getIsbn());
 
-          doInNewTransaction(() -> {
-            BookRating ratingTx2 = bookRatingRepository.findByBookIsbn(this.book.getIsbn());
+                      doInNewTransaction(
+                          () -> {
+                            BookRating ratingTx2 =
+                                bookRatingRepository.findByBookIsbn(this.book.getIsbn());
 
-            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
+                            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
 
-            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
-            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
-          });
+                            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
+                            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
+                          });
 
-          assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
+                      assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
 
-          ratingTx1.setRating(ratingTx1.getRating().add(new BigDecimal("0.2")));
-          ratingTx1.setNumberOfRatings(ratingTx1.getNumberOfRatings() + 1);
-        }))
+                      ratingTx1.setRating(ratingTx1.getRating().add(new BigDecimal("0.2")));
+                      ratingTx1.setNumberOfRatings(ratingTx1.getNumberOfRatings() + 1);
+                    }))
         .isInstanceOf(ObjectOptimisticLockingFailureException.class)
-        .hasCauseInstanceOf(StaleObjectStateException.class);
+        .hasCauseInstanceOf(StaleStateException.class);
 
     BookRating rating = bookRatingRepository.findByBookIsbn(this.book.getIsbn());
 
@@ -134,22 +139,26 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
   void explicitOptimisticLock() {
     log.info("@Lock(OPTIMISTIC) and OptimisticLockException");
 
-    assertThatThrownBy(() ->
-        doInNewTransaction(() -> {
-          BookRating ratingTx1 =
-              bookRatingRepository.findByBookIsbnOptimisticLock(this.book.getIsbn());
+    assertThatThrownBy(
+            () ->
+                doInNewTransaction(
+                    () -> {
+                      BookRating ratingTx1 =
+                          bookRatingRepository.findByBookIsbnOptimisticLock(this.book.getIsbn());
 
-          doInNewTransaction(() -> {
-            BookRating ratingTx2 = bookRatingRepository.findByBookIsbn(this.book.getIsbn());
+                      doInNewTransaction(
+                          () -> {
+                            BookRating ratingTx2 =
+                                bookRatingRepository.findByBookIsbn(this.book.getIsbn());
 
-            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
+                            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
 
-            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
-            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
-          });
+                            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
+                            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
+                          });
 
-          assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
-        }))
+                      assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
+                    }))
         .isInstanceOf(ObjectOptimisticLockingFailureException.class)
         .hasCauseInstanceOf(OptimisticLockException.class);
 
@@ -165,22 +174,27 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
   void explicitOptimisticForceIncrementLock() {
     log.info("@Lock(OPTIMISTIC_FORCE_INCREMENT) and StaleObjectStateException");
 
-    assertThatThrownBy(() ->
-        doInNewTransaction(() -> {
-          BookRating ratingTx1 =
-              bookRatingRepository.findByBookIsbnOptimisticForceIncrementLock(this.book.getIsbn());
+    assertThatThrownBy(
+            () ->
+                doInNewTransaction(
+                    () -> {
+                      BookRating ratingTx1 =
+                          bookRatingRepository.findByBookIsbnOptimisticForceIncrementLock(
+                              this.book.getIsbn());
 
-          doInNewTransaction(() -> {
-            BookRating ratingTx2 = bookRatingRepository.findByBookIsbn(this.book.getIsbn());
+                      doInNewTransaction(
+                          () -> {
+                            BookRating ratingTx2 =
+                                bookRatingRepository.findByBookIsbn(this.book.getIsbn());
 
-            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
+                            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion());
 
-            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
-            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
-          });
+                            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
+                            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
+                          });
 
-          assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
-        }))
+                      assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
+                    }))
         .isInstanceOf(ObjectOptimisticLockingFailureException.class)
         .hasCauseInstanceOf(StaleObjectStateException.class);
 
@@ -199,30 +213,36 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch doneLatch = new CountDownLatch(2);
 
-    doInNewTransaction(() -> {
-      BookRating ratingTx1 =
-          bookRatingRepository.findByBookIsbnPessimisticWriteLock(this.book.getIsbn());
+    doInNewTransaction(
+        () -> {
+          BookRating ratingTx1 =
+              bookRatingRepository.findByBookIsbnPessimisticWriteLock(this.book.getIsbn());
 
-      CompletableFuture.runAsync(() ->
-          doInNewTransaction(() -> {
-            startLatch.countDown();
+          CompletableFuture.runAsync(
+              () ->
+                  doInNewTransaction(
+                      () -> {
+                        startLatch.countDown();
 
-            BookRating ratingTx2 =
-                bookRatingRepository.findByBookIsbnPessimisticWriteLock(this.book.getIsbn());
+                        BookRating ratingTx2 =
+                            bookRatingRepository.findByBookIsbnPessimisticWriteLock(
+                                this.book.getIsbn());
 
-            assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion() + 1);
+                        assertThat(ratingTx2.getVersion()).isEqualTo(this.rating.getVersion() + 1);
 
-            ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
-            ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
-          }, doneLatch));
+                        ratingTx2.setRating(ratingTx2.getRating().add(new BigDecimal("0.1")));
+                        ratingTx2.setNumberOfRatings(ratingTx2.getNumberOfRatings() + 1);
+                      },
+                      doneLatch));
 
-      await(startLatch);
+          await(startLatch);
 
-      assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
+          assertThat(ratingTx1.getVersion()).isEqualTo(this.rating.getVersion());
 
-      ratingTx1.setRating(ratingTx1.getRating().add(new BigDecimal("0.2")));
-      ratingTx1.setNumberOfRatings(ratingTx1.getNumberOfRatings() + 1);
-    }, doneLatch);
+          ratingTx1.setRating(ratingTx1.getRating().add(new BigDecimal("0.2")));
+          ratingTx1.setNumberOfRatings(ratingTx1.getNumberOfRatings() + 1);
+        },
+        doneLatch);
 
     await(doneLatch);
 
@@ -241,22 +261,28 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch doneLatch = new CountDownLatch(3);
 
-    doInNewTransaction(() -> {
-      bookRatingRepository.findByBookIsbnPessimisticReadLock(this.book.getIsbn());
+    doInNewTransaction(
+        () -> {
+          bookRatingRepository.findByBookIsbnPessimisticReadLock(this.book.getIsbn());
 
-      doInNewTransaction(() ->
-              bookRatingRepository.findByBookIsbnPessimisticReadLock(this.book.getIsbn()),
-          doneLatch);
+          doInNewTransaction(
+              () -> bookRatingRepository.findByBookIsbnPessimisticReadLock(this.book.getIsbn()),
+              doneLatch);
 
-      CompletableFuture.runAsync(() ->
-          doInNewTransaction(() -> {
-            startLatch.countDown();
+          CompletableFuture.runAsync(
+              () ->
+                  doInNewTransaction(
+                      () -> {
+                        startLatch.countDown();
 
-            bookRatingRepository.findByBookIsbnPessimisticWriteLock(this.book.getIsbn());
-          }, doneLatch));
+                        bookRatingRepository.findByBookIsbnPessimisticWriteLock(
+                            this.book.getIsbn());
+                      },
+                      doneLatch));
 
-      await(startLatch);
-    }, doneLatch);
+          await(startLatch);
+        },
+        doneLatch);
 
     await(doneLatch);
   }
@@ -267,12 +293,13 @@ class BookRatingRepositoryTest extends AbstractContainerBaseTest {
 
   private void doInNewTransaction(Runnable runnable, CountDownLatch doneLatch) {
     try {
-      txTemplate.execute(new TransactionCallbackWithoutResult() {
-        @Override
-        protected void doInTransactionWithoutResult(TransactionStatus status) {
-          runnable.run();
-        }
-      });
+      txTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              runnable.run();
+            }
+          });
     } finally {
       if (doneLatch != null) {
         doneLatch.countDown();

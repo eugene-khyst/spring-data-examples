@@ -1,81 +1,89 @@
 # Spring Data JPA pitfalls and modern alternatives: Spring Data JDBC and Spring Data R2DBC
 
-* [Overview](#3b878279a04dc47d60932cb294d96259)
-* [Spring Data JPA](#810bf4be9fd3907b3e5cff790716a958)
-  * [Fetching strategies](#75e0f07fedd63771fc35ec852a9c937f)
-  * [Locking strategies](#9a3347442ef97064c198bda69c16f816)
-  * [Entity to DTO mapping](#6066f586527da9c5d0e297396ca12e5e)
-* [Spring Data JDBC](#86e43ec88f085c89356cfb650c7d5ce7)
-* [Spring Data R2DBC](#afa7b6461a2e3f16a1895d95522f3f29)
-* [Conclusion](#6f8b794f3246b0c1e1780bb4d4d5dc53)
-* [Spring Data JPA example](#e930cfb2216d9b0871311eeabd12ef12)
-  * [Test data](#ca1ea02c10b7c37f425b9b7dd86d5e11)
-  * [Fetching strategies](#75e0f07fedd63771fc35ec852a9c937f)
-    * [Entity without explicit `@Fetch`](#7ea24578e6c11808b7b2880dd98bc573)
-      * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-      * [Query method](#ecfc45d33505baec3249b78ec3e66059)
-      * [Query method with `@EntityGraph`](#957184c667a66fa2409d3c81d58e0f90)
-      * [Query method with `@EntityGraph` and `Pageable`](#ce895104ae9e9dd02aafbba89a339104)
-      * [Query method with `@EntityGraph` with multiple attribute nodes (issue HHH-13740)](#260b142dfcc1f303ff3e67de6da4d730)
-      * [`@Query` with JPQL `join fetch`](#99fac513c058317164ad5a6e20d34f18)
-      * [`@Query` with JPQL `join fetch` and `distinct`](#ff9705f518ec48b7fa77d2d6cd0c3c14)
-      * [Custom `@Repository` with Criteria API query](#e11be536b6f6d686f69f20513138cae0)
-      * [Custom `@Repository` with Criteria API query with `fetch`](#1323d64c9e1914e06c3b257f7cea728c)
-      * [Custom `@Repository` with Criteria API query with `fetch` and `distinct`](#7285e9899741d937830c2225ff8d01bc)
-    * [Entity with `@Fetch(JOIN)`](#239f2f55854878f99d5d4d379a765d39)
-      * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-      * [Query method](#ecfc45d33505baec3249b78ec3e66059)
-    * [Entity with `@Fetch(SELECT)`](#61d561e02c4002d6d6ad4646e5d328f7)
-      * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-      * [Query method](#ecfc45d33505baec3249b78ec3e66059)
-    * [Entity with `@Fetch(SUBSELECT)`](#76b5b36ea931f6c209971594a5473ffa)
-      * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-      * [Query method](#ecfc45d33505baec3249b78ec3e66059)
-    * [Entity with `@BatchSize`](#b77feec501b1fe41ebee44d25e206880)
-      * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-      * [Query method](#ecfc45d33505baec3249b78ec3e66059)
-    * [Entity with multiple bags resulting in `MultipleBagFetchException`](#1049387d75c060dc77f67c5477fb48d4)
-  * [Locking strategies](#9a3347442ef97064c198bda69c16f816)
-    * [Implicit optimistic lock of entity with `@Version` on modification](#272ede57357a5f214f2904c15e3fe103)
-    * [Explicit optimistic lock `@Lock(OPTIMISTIC)`](#502c2256dbc0a223143500d9f9b3b5cc)
-    * [Explicit optimistic lock `@Lock(OPTIMISTIC_FORCE_INCREMENT)`](#6efaef54090120ae008692898745a547)
-    * [Explicit pessimistic write lock `@Lock(PESSIMISTIC_WRITE)`](#c2b4e4a7c69f6c6b216e05a547731c57)
-    * [Explicit pessimistic read lock `@Lock(PESSIMISTIC_READ)`](#657a4b524b13a122706ee27f7675bcf7)
-  * [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
-* [Spring Data JDBC example](#1ef62fd469285970a640c75be1cbdb9a)
-  * [Test data](#ca1ea02c10b7c37f425b9b7dd86d5e11)
-  * [Queries](#cf43137803fb51915f84cbc5c3068d34)
-    * [`CrudRepository.save`](#07109b7f3df585c23975718b13843dac)
-    * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-    * [`PagingAndSortingRepository.findAll(Pageable)`](#f34c8b22bd6fb5a16c60b7ecd412d675)
-    * [`@Query` with SQL](#fe9f09d7c10598e080ef1ac1502711df)
-    * [`@Query` with SQL join](#ce75f4a17b574599267b2a18924cb931)
-    * [`@Query` with SQL and pagination](#59581bf130250c31253eac07da3d2c56)
-  * [Locking strategies](#9a3347442ef97064c198bda69c16f816)
-    * [Implicit optimistic lock of entity with `@Version` on modification](#272ede57357a5f214f2904c15e3fe103)
-  * [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
-  * [Reactive `Mono.fromCallable` wrapping synchronous call](#fc1290b67d538903eba761ca9f952dc9)
-* [Spring Data R2DBC example](#1418b03e9a73d96a8c697855b6c0401e)
-  * [Queries](#cf43137803fb51915f84cbc5c3068d34)
-    * [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
-    * [Query method with `Sort`](#74790cb9ca9d56e09b465befb7c7603b)
-    * [`@Query` with SQL and pagination](#59581bf130250c31253eac07da3d2c56)
-    * [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
+- [Overview](#3b878279a04dc47d60932cb294d96259)
+- [Spring Data JPA](#810bf4be9fd3907b3e5cff790716a958)
+  - [Fetching strategies](#75e0f07fedd63771fc35ec852a9c937f)
+  - [Locking strategies](#9a3347442ef97064c198bda69c16f816)
+  - [Primary key generation](#4913ac92d5278259d9ed6f5a54ca4200)
+  - [Entity to DTO mapping](#6066f586527da9c5d0e297396ca12e5e)
+- [Spring Data JDBC](#86e43ec88f085c89356cfb650c7d5ce7)
+- [Spring Data R2DBC](#afa7b6461a2e3f16a1895d95522f3f29)
+- [Conclusion](#6f8b794f3246b0c1e1780bb4d4d5dc53)
+- [Spring Data JPA example](#e930cfb2216d9b0871311eeabd12ef12)
+  - [Test data](#ca1ea02c10b7c37f425b9b7dd86d5e11)
+  - [Fetching strategies](#75e0f07fedd63771fc35ec852a9c937f)
+    - [Entity without explicit `@Fetch`](#7ea24578e6c11808b7b2880dd98bc573)
+      - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+      - [Query method](#ecfc45d33505baec3249b78ec3e66059)
+      - [Query method with `@EntityGraph`](#957184c667a66fa2409d3c81d58e0f90)
+      - [Query method with `@EntityGraph` and `Pageable`](#ce895104ae9e9dd02aafbba89a339104)
+      - [Query method with `@EntityGraph` with multiple attribute nodes (issue HHH-13740)](#260b142dfcc1f303ff3e67de6da4d730)
+      - [`@Query` with JPQL `join fetch`](#99fac513c058317164ad5a6e20d34f18)
+      - [`@Query` with JPQL `join fetch` and `distinct`](#ff9705f518ec48b7fa77d2d6cd0c3c14)
+      - [Custom `@Repository` with Criteria API query](#e11be536b6f6d686f69f20513138cae0)
+      - [Custom `@Repository` with Criteria API query with `fetch`](#1323d64c9e1914e06c3b257f7cea728c)
+      - [Custom `@Repository` with Criteria API query with `fetch` and `distinct`](#7285e9899741d937830c2225ff8d01bc)
+    - [Entity with `@Fetch(JOIN)`](#239f2f55854878f99d5d4d379a765d39)
+      - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+      - [Query method](#ecfc45d33505baec3249b78ec3e66059)
+    - [Entity with `@Fetch(SELECT)`](#61d561e02c4002d6d6ad4646e5d328f7)
+      - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+      - [Query method](#ecfc45d33505baec3249b78ec3e66059)
+    - [Entity with `@Fetch(SUBSELECT)`](#76b5b36ea931f6c209971594a5473ffa)
+      - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+      - [Query method](#ecfc45d33505baec3249b78ec3e66059)
+    - [Entity with `@BatchSize`](#b77feec501b1fe41ebee44d25e206880)
+      - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+      - [Query method](#ecfc45d33505baec3249b78ec3e66059)
+    - [Entity with multiple bags resulting in `MultipleBagFetchException`](#1049387d75c060dc77f67c5477fb48d4)
+  - [Locking strategies](#9a3347442ef97064c198bda69c16f816)
+    - [Implicit optimistic lock of entity with `@Version` on modification](#272ede57357a5f214f2904c15e3fe103)
+    - [Explicit optimistic lock `@Lock(OPTIMISTIC)`](#502c2256dbc0a223143500d9f9b3b5cc)
+    - [Explicit optimistic lock `@Lock(OPTIMISTIC_FORCE_INCREMENT)`](#6efaef54090120ae008692898745a547)
+    - [Explicit pessimistic write lock `@Lock(PESSIMISTIC_WRITE)`](#c2b4e4a7c69f6c6b216e05a547731c57)
+    - [Explicit pessimistic read lock `@Lock(PESSIMISTIC_READ)`](#657a4b524b13a122706ee27f7675bcf7)
+  - [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
+- [Spring Data JDBC example](#1ef62fd469285970a640c75be1cbdb9a)
+  - [Test data](#ca1ea02c10b7c37f425b9b7dd86d5e11)
+  - [Queries](#cf43137803fb51915f84cbc5c3068d34)
+    - [`CrudRepository.save`](#07109b7f3df585c23975718b13843dac)
+    - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+    - [`PagingAndSortingRepository.findAll(Pageable)`](#f34c8b22bd6fb5a16c60b7ecd412d675)
+    - [`@Query` with SQL](#fe9f09d7c10598e080ef1ac1502711df)
+    - [`@Query` with SQL join](#ce75f4a17b574599267b2a18924cb931)
+    - [`@Query` with SQL and pagination](#59581bf130250c31253eac07da3d2c56)
+  - [Locking strategies](#9a3347442ef97064c198bda69c16f816)
+    - [Implicit optimistic lock of entity with `@Version` on modification](#272ede57357a5f214f2904c15e3fe103)
+  - [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
+  - [Reactive `Mono.fromCallable` wrapping synchronous call](#fc1290b67d538903eba761ca9f952dc9)
+- [Spring Data R2DBC example](#1418b03e9a73d96a8c697855b6c0401e)
+  - [Queries](#cf43137803fb51915f84cbc5c3068d34)
+    - [`CrudRepository.findById`](#4a2070d3aad7ff832b5e36f76cc6f731)
+    - [Query method with `Sort`](#74790cb9ca9d56e09b465befb7c7603b)
+    - [`@Query` with SQL and pagination](#59581bf130250c31253eac07da3d2c56)
+    - [Mapping from entity to DTO using MapStruct](#532d5a8c2809912b992aa517d1e46ced)
 
-## <a name="3b878279a04dc47d60932cb294d96259"></a>Overview
+<!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
+
+## <a id="3b878279a04dc47d60932cb294d96259"></a>Overview
 
 These examples demonstrates some common JPA pitfalls and evaluates alternatives from the Spring Data family:
 * [spring-data-jpa-examples](spring-data-jpa-examples/) - some of common JPA pitfalls
 * [spring-data-jdbc-examples](spring-data-jdbc-examples/) - Spring Data JDBC as a simpler alternative inspired by Domain-Driven Design
 * [spring-data-r2dbc-examples](spring-data-r2dbc-examples/) - Spring Data R2DBC for reactive database connectivity
 
-Spring Data is a family of libraries aiming to simplify the implementation of a data access layer for Spring-based applications by reducing boilerplate code. 
+[Spring Data](https://spring.io/projects/spring-data) is a family of libraries aiming to simplify the implementation of a data access layer for Spring-based applications by reducing boilerplate code. 
 Spring Data makes it easy to implement a Repository for accessing persistent entities in the underlying data store.
-Spring Data JPA allows to build repositories based on JPA.
+Spring Data JPA allows building repositories based on JPA.
 
 JPA (Java Persistence API) is an API specification that defines an ORM (object-relational mapping) standard for Java applications.
-The most popular JPA vendor is Hibernate ORM.
-JPA 1.0 was released in 2006, and the latest (at the time of writing) versions are JPA 2.2 and Hibernate ORM 5.4.14.Final.
+JPA 1.0 was released in 2006, and the last version is JPA 2.2.
+The JPA was renamed as Jakarta Persistence in 2019 and version 3.0 was released in 2020. 
+[Jakarta Persistence 3.0](https://jakarta.ee/specifications/persistence/3.0/) didn’t introduce any new features, the only change is the renaming of packages and properties from `javax.persistence` to `jakarta.persistence`.
+
+The most popular JPA/Jakarta Persistence vendor is [Hibernate](https://hibernate.org/) ORM.
+Hibernate supports JPA 2.2 since the 5.3 series and Jakarta Persistence 3.0 since 5.5 series.
+
 JPA and Hibernate are de facto a standard way of implementing a data access layer in Java applications.
 
 All these years JPA and Hibernate are criticized for being too complicated.
@@ -86,9 +94,9 @@ More importantly, in the JPA, many DB calls are made behind the scenes.
 A simple query sometimes leads to multiple SQL queries to a DB.
 In its turn, too many SQL queries leads to performance problems.
 
-## <a name="810bf4be9fd3907b3e5cff790716a958"></a>Spring Data JPA
+## <a id="810bf4be9fd3907b3e5cff790716a958"></a>Spring Data JPA
 
-Spring Data JPA allows writing less boilerplate code, but JPA and Hibernate still have many pitfalls.
+[Spring Data JPA](https://spring.io/projects/spring-data-jpa) allows writing less boilerplate code, but JPA and Hibernate still have many pitfalls.
 The ones described in this example, I consider the most common pitfalls.
 
 Thus, [spring-data-jpa-examples](spring-data-jpa-examples/) demonstrate and analyze the following JPA-related topics:
@@ -96,7 +104,10 @@ Thus, [spring-data-jpa-examples](spring-data-jpa-examples/) demonstrate and anal
 * locking strategies
 * entity to DTO mapping
 
-### <a name="75e0f07fedd63771fc35ec852a9c937f"></a>Fetching strategies
+Spring Framework 5.3.x line and Spring Boot 2.6.x line still use JPA 2.2.
+Spring Framework 6 and Spring Boot 3 with Jakarta Persistence 3.0 support (as a part of Jakarta EE 9 compatibility) are planned for general availability in Q4 2022.
+
+### <a id="75e0f07fedd63771fc35ec852a9c937f"></a>Fetching strategies
 
 An entity can reference others called child entities.
 When fetching an entity, should Hibernate also fetch child entities? 
@@ -107,12 +118,11 @@ Some of them can cause problems if used improperly.
 
 One-to-many and many-to-many relationships are mapped to fields of a class of types `List` and `Set` 
 annotated with JPA annotations `@OneToMany` or `@ManyToMany`.
-These annotations have parameter `fetch` of type `javax.persistence.FetchType`.
+These annotations have parameter `fetch` of type `javax.persistence.FetchType`/`jakarta.persistence.FetchType`.
 
-There are also Hibernate-specific annotation `@Fetch` with parameter `value` of type `org.hibernate.annotations.FetchMode` 
-and `@BatchSize` that define how a child entity fetching is done.
+There are also Hibernate-specific annotation `@Fetch` with parameter `value` of type `org.hibernate.annotations.FetchMode` and `@BatchSize` that define how a child entity fetching is done.
 
-`javax.persistence.FetchType` defines **when** the fetching is done 
+`javax.persistence.FetchType`/`jakarta.persistence.FetchType` defines **when** the fetching is done 
 while `org.hibernate.annotations.FetchMode` focuses on **how**.
 
 There are 2 `FetchType` values:
@@ -154,10 +164,6 @@ The first SQL query selects parent (root) entities only.
 Each associated collection is loaded with a separate SQL query.
 Thus, Hibernate makes N+1 SQL queries, where N is the number of parent (root) entities in the result set.
 
-Find out more about "N+1 selects" problem and other database-related performance problems in the [slides](https://www.slideshare.net/EvgeniyKhist/application-performance-databaserelated-problems).
-
-[![The slides on SlideShare](img/application-performance-database-related-problems.png)](https://www.slideshare.net/EvgeniyKhist/application-performance-databaserelated-problems)
-
 Solutions to "N+1 selects" problem:
 * `FetchMode.JOIN` 
 * `FetchMode.SUBSELECT` 
@@ -197,9 +203,9 @@ Increasing batch size adds more values to the `IN` clause.
 Remember that Oracle database has limitation of 1000 items in `IN` clause.
 So, `@BatchSize` looks like the most safe solution for generic cases.
 
-Find out more details in the [example](#springdatajpaexample).
+Find out more details in the [example](#e930cfb2216d9b0871311eeabd12ef12).
 
-### <a name="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
+### <a id="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
 
 Locks are mechanisms that prevent destructive interaction between transactions accessing the same resource.
 
@@ -243,38 +249,20 @@ UPDATE tbl SET col1 = 'new value', version = version + 1 WHERE version = :versio
 Table should have column to store version. 
 Update of the row is done with version checking. 
 If row version has already changed in other transaction, changes of current transaction are discarded and whole transaction should be repeated.
-```
-the first transaction started            |
-                                         | the second transaction started
-SELECT * FROM tbl WHERE id=1 --version=1 |
-                                         | SELECT * FROM tbl WHERE id=1 --version=1 
-UPDATE tbl SET val='new val', version=2  | 
- WHERE id=1 AND version=1                |
-                                         | UPDATE tbl SET val='new val', version=2
-                                         |  WHERE id=1 AND version=1
-                                         | waiting to obtain update lock...
-                                         | waiting to obtain update lock...
-commit transaction                       | 
-                                         | No rows were updated
-                                         |  because version=2 after commit of the first transaction
-                                         | 
-                                         | optimistic locking exception is raised
-                                         |
-                                         | rollback transaction
-```
+
+![Optimistic locking](img/optimistic-locking.png)
+
 If version check is optimistic locking fails, read and update queries should be re-executed.
 
 Pessimistic locking prevents lost updates and makes updates serial (FIFO) reducing throughput.
 Optimistic locking just prevents lost updates.
 
-Optimistic locking allows to reduce time the lock is held and sometimes increases throughput.
-
-Find out more about reducing lock contention and other database-related performance problems in the [slides](https://www.slideshare.net/EvgeniyKhist/application-performance-databaserelated-problems).
+Optimistic locking allows reducing the time the lock is held and sometimes increases throughput.
 
 If an entity has a field annotated with `@Version`, optimistic locking is enabled by default if the entity was modified, even without explicitly specifying `LockModeType`.
 But if the entity was not modified, there will be no version check before transaction commit. 
 
-JPA has the following `javax.persistence.LockModeType` values:
+JPA has the following `javax.persistence.LockModeType`/`jakarta.persistence.LockModeType` values:
 * `OPTIMISTIC` - if an entity was not modified, and a version check can't be done in an `UPDATE`, it is still done before a transaction commit using a simple `SELECT version FROM tbl`
 * `OPTIMISTIC_FORCE_INCREMENT` - a version is incremented using an `UPDATE tlb SET version = version + 1` even if an entity was not modified
 * `PESSIMISTIC_WRITE` - a record is locked using a `SELECT FOR UPDATE`
@@ -285,9 +273,16 @@ If version was changed by another committed transaction, an `OptimisticLockExcep
 But between `SELECT` doing version check, and a commit of the current transaction there is a small time gap.
 There is a risk that during this time another transaction still can change this entity.
 
-Find out more details in the [example](#springdatajpaexample).
+Find out more details in the [example](#e930cfb2216d9b0871311eeabd12ef12).
 
-### <a name="6066f586527da9c5d0e297396ca12e5e"></a>Entity to DTO mapping
+### <a id="4913ac92d5278259d9ed6f5a54ca4200"></a>Primary key generation
+
+generating unique keys for use in a database as a primary key
+https://en.wikipedia.org/wiki/Hi/Lo_algorithm
+
+
+
+### <a id="6066f586527da9c5d0e297396ca12e5e"></a>Entity to DTO mapping
 
 Exposing JPA entities in a REST API can cause problems.
 Instead, map entities to DTOs and expose them.
@@ -313,13 +308,16 @@ Yes, we need DTOs even if initially the JPA entity and DTO fields are identical 
 * `LazyInitializationException` when serializing associations with `FetchType.LAZY`
 * there's 99% chance that entity or DTO structure will change and become not identical
 
+JDK 14 introduces [records](https://docs.oracle.com/en/java/javase/14/language/records.html), which are a new kind of 
+type declaration. Like an `enum`, a record is a restricted form of a class. It’s ideal for DTOs.
+
 To simplify entity to DTO mapping I recommend [MapStruct](https://mapstruct.org/) library.
-Unlike most other bean mapping tools, MapStruct doesn’t work at runtime but is a compile-time code generator.
-It generates the mapper class at the compile time.
+Unlike most others bean mapping tools, MapStruct doesn't work at runtime but is a compile-time code generator.
+It generates the mapper class at the compilation time.
 
-Find out more details in the [example](#springdatajpaexample).
+Find out more details in the [example](#e930cfb2216d9b0871311eeabd12ef12).
 
-## <a name="86e43ec88f085c89356cfb650c7d5ce7"></a>Spring Data JDBC
+## <a id="86e43ec88f085c89356cfb650c7d5ce7"></a>Spring Data JDBC
 
 In the previous section we've found out that JPA and Hibernate has a lot of pitfalls and is complicated.
 
@@ -354,7 +352,7 @@ It produces duplicates in the result set while Spring Data JDBC still makes addi
 So, Spring Data JDBC is also subject to "N+1 selects" problem.
 
 Spring Data JDBC supports optimistic locking by using `org.springframework.data.annotation.Version` annotation.
-The behaviour is similar to JPA with `javax.persistence.Version` annotation.
+The behaviour is similar to JPA with `javax.persistence.Version`/`jakarta.persistence.Version` annotation.
 
 Spring Data JDBC still misses some useful features like pagination for custom queries.
 
@@ -378,22 +376,18 @@ Mono<Book> blockingWrapper = Mono.fromCallable(() ->
 
 Find out more details in the example.
 
-## <a name="afa7b6461a2e3f16a1895d95522f3f29"></a>Spring Data R2DBC
+## <a id="afa7b6461a2e3f16a1895d95522f3f29"></a>Spring Data R2DBC
 
-Spring Data JDBC is simpler than JPA and has fewer pitfalls.
+Spring Data JDBC is simpler than JPA/Jakarta Persistence and has fewer pitfalls.
 But it would be good to have a truly reactive non-blocking data access layer.
 That's where Spring Data R2DBC comes in.
 The latest (at the time of writing) version is Spring Data R2DBC 1.1.0.RC1.
 
 Spring Data R2DBC uses Reactive Relational Database Connectivity, a reactive programming APIs to relational databases.
 In contrast to the blocking nature of JDBC, R2DBC is non-blocking and has a reactive API.
-R2DBC drivers are available for:
-* PostgreSQL
-* MySQL
-* MS SQL
-* H2
+R2DBC drivers are available for the most popular databases.
 
-Spring Data R2DBC used together with Spring WebFlux allows to develop fully-reactive and non-blocking applications.
+Spring Data R2DBC used together with Spring WebFlux allow developing fully-reactive and non-blocking applications.
 
 Spring Data R2DBC concept is to be a simple and easy to use object mapper and 
 does **NOT** provide many features of ORM.
@@ -412,7 +406,7 @@ Fetching associations and mapping to DTO are not easy tasks with Spring Data R2D
 
 Find out more details in the example.
 
-## <a name="6f8b794f3246b0c1e1780bb4d4d5dc53"></a>Conclusion
+## <a id="6f8b794f3246b0c1e1780bb4d4d5dc53"></a>Conclusion
 
 Spring Data JPA dramatically reduces the amount of boilerplate code.
 Anyway, JPA and Hibernate have a lot of pitfalls developers should be aware of.
@@ -428,7 +422,7 @@ The idea to have an entirely reactive Java application based on non-blocking I/O
 
 So, in Spring Data family there is no production-ready alternative to Spring Data JPA for enterprise applications nowadays.
 
-## <a name="e930cfb2216d9b0871311eeabd12ef12"></a>Spring Data JPA example
+## <a id="e930cfb2216d9b0871311eeabd12ef12"></a>Spring Data JPA example
 
 [spring-data-jpa-examples](spring-data-jpa-examples/) has a simple domain model. 
 A book has at least one author and belongs to at least one category.
@@ -465,7 +459,7 @@ The example uses [Testcontainers](https://www.testcontainers.org/) library that 
 This library starts a PostgreSQL Docker container for integration tests.
 Using the same database in production and integration tests is a big advantage compared to using in-memory databases like H2 or HSQLDB.
 
-### <a name="ca1ea02c10b7c37f425b9b7dd86d5e11"></a>Test data
+### <a id="ca1ea02c10b7c37f425b9b7dd86d5e11"></a>Test data
 
 `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -535,9 +529,9 @@ rating.setNumberOfRatings(240);
 bookRatingRepository.save(rating);
 ```
 
-### <a name="75e0f07fedd63771fc35ec852a9c937f"></a>Fetching strategies
+### <a id="75e0f07fedd63771fc35ec852a9c937f"></a>Fetching strategies
 
-#### <a name="7ea24578e6c11808b7b2880dd98bc573"></a>Entity without explicit `@Fetch`
+#### <a id="7ea24578e6c11808b7b2880dd98bc573"></a>Entity without explicit `@Fetch`
 
 `com.example.spring.data.jpa.entity.Book`
 
@@ -556,7 +550,7 @@ public class Book extends AbstractBook {
 }
 ```
 
-##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+##### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.jpa.BookRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -600,7 +594,7 @@ void findById() {
     WHERE  categories0_.book_id = ? /*57*/
     ```
    
-##### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
+##### <a id="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
 `com.example.spring.data.jpa.repository.BookRepository` extends `com.example.spring.data.jpa.repository.AbstractBookRepository`
 
@@ -684,10 +678,10 @@ Query selects 2 books, so 5 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*57*/
     ```
 
-##### <a name="957184c667a66fa2409d3c81d58e0f90"></a>Query method with `@EntityGraph`
+##### <a id="957184c667a66fa2409d3c81d58e0f90"></a>Query method with `@EntityGraph`
 
 JPA 2.1 has introduced the Entity Graph feature as dynamic alternative to `FetchType.LAZY` and `FetchType.EAGER` that are static and can't be changed at runtime.
-Entity Graph allows to specify what associations and basic fields have to loaded.
+Entity Graph allows specifying what associations and basic fields have to loaded.
 As mentioned above, `FetchType.EAGER` applied to child collections is ignored by JPQL queries.
 So, Entity Graph is a solution for making Hibernate fetch child collections eagerly using SQL join. 
 
@@ -768,7 +762,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-##### <a name="ce895104ae9e9dd02aafbba89a339104"></a>Query method with `@EntityGraph` and `Pageable`
+##### <a id="ce895104ae9e9dd02aafbba89a339104"></a>Query method with `@EntityGraph` and `Pageable`
 
 Usage of `@EntityGraph` with `Pageable` results in warning
 `HHH000104: firstResult/maxResults specified with collection fetch; applying in memory!`.
@@ -827,7 +821,7 @@ Query selects 1 book, then the result set is pagination is applied in memory, so
     WHERE  categories0_.book_id = ? /*57*/
     ```
 
-##### <a name="260b142dfcc1f303ff3e67de6da4d730"></a>Query method with `@EntityGraph` with multiple attribute nodes (issue HHH-13740)
+##### <a id="260b142dfcc1f303ff3e67de6da4d730"></a>Query method with `@EntityGraph` with multiple attribute nodes (issue HHH-13740)
 
 When `@EntityGraph` has multiple attribute nodes and so defines multiple child collection to be eagerly fetched 
 we face with issue [HHH-13740](https://hibernate.atlassian.net/browse/HHH-13740) related to duplicates in the child collections.
@@ -901,7 +895,7 @@ void entityGraphMultipleAttributeNodes() {
     ORDER  BY book0_.publication_date ASC
     ```
 
-##### <a name="99fac513c058317164ad5a6e20d34f18"></a>`@Query` with JPQL `join fetch`
+##### <a id="99fac513c058317164ad5a6e20d34f18"></a>`@Query` with JPQL `join fetch`
 
 One more way to fetch related association using SQL join is to use custom JPQL query with `join fetch`.
 The result set in such a case will contain duplicates if the child collection size is greater than 1 (>=2).
@@ -976,7 +970,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-##### <a name="ff9705f518ec48b7fa77d2d6cd0c3c14"></a>`@Query` with JPQL `join fetch` and `distinct`
+##### <a id="ff9705f518ec48b7fa77d2d6cd0c3c14"></a>`@Query` with JPQL `join fetch` and `distinct`
 
 A workaround to the issue with duplicates due to using JQPL `join fetch` is to use `distinct` operator. 
 
@@ -1048,7 +1042,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-##### <a name="e11be536b6f6d686f69f20513138cae0"></a>Custom `@Repository` with Criteria API query
+##### <a id="e11be536b6f6d686f69f20513138cae0"></a>Custom `@Repository` with Criteria API query
 
 Spring Data JPA also supports Criteria API queries.
 Create an extension interface with a method for a custom query you want to implement using Criteria API.
@@ -1205,7 +1199,7 @@ Query selects 2 books, so 5 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-##### <a name="1323d64c9e1914e06c3b257f7cea728c"></a>Custom `@Repository` with Criteria API query with `fetch`
+##### <a id="1323d64c9e1914e06c3b257f7cea728c"></a>Custom `@Repository` with Criteria API query with `fetch`
 
 To eagerly load a related association in Criteria API, use `fetch` method.
 
@@ -1275,7 +1269,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-##### <a name="7285e9899741d937830c2225ff8d01bc"></a>Custom `@Repository` with Criteria API query with `fetch` and `distinct`
+##### <a id="7285e9899741d937830c2225ff8d01bc"></a>Custom `@Repository` with Criteria API query with `fetch` and `distinct`
 
 A workaround to the issue with duplicates due to using `join` or `fetch` in Criteria API is to use `distinct` method.
 
@@ -1344,7 +1338,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_id = ? /*58*/
     ```
 
-#### <a name="239f2f55854878f99d5d4d379a765d39"></a>Entity with `@Fetch(JOIN)`
+#### <a id="239f2f55854878f99d5d4d379a765d39"></a>Entity with `@Fetch(JOIN)`
 
 `com.example.spring.data.jpa.entity.BookWithFetchModeJoin`
 
@@ -1365,7 +1359,7 @@ public class BookWithFetchModeJoin extends AbstractBook {
 }
 ```
 
-##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+##### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 When multiple child collection has `FetchMode.JOIN` 
 we face with issue [HHH-13740](https://hibernate.atlassian.net/browse/HHH-13740) related to duplicates in the child collections.
@@ -1421,7 +1415,7 @@ A single SQL query is executed per `CrudRepository.findById` call.
     WHERE  bookwithfe0_.id = ?
     ```
 
-##### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
+##### <a id="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
 The behavior of JQPL queries (query methods) during the loading entities 
 with associations with `FetchMode.JOIN` is, at first glance, a bit unexpected. 
@@ -1507,7 +1501,7 @@ Query selects 2 books, so 5 SQL queries are executed.
     WHERE  authors0_.book_with_fetch_mode_join_id = ? /*24*/
     ```
 
-#### <a name="61d561e02c4002d6d6ad4646e5d328f7"></a>Entity with `@Fetch(SELECT)`
+#### <a id="61d561e02c4002d6d6ad4646e5d328f7"></a>Entity with `@Fetch(SELECT)`
 
 `com.example.spring.data.jpa.entity.BookWithFetchModeSelect`
 
@@ -1530,7 +1524,7 @@ public class BookWithFetchModeSelect extends AbstractBook {
 
 With `FetchMode.SELECT` each association for all parent entities from the result set is loaded with a separate SQL `SELECT`. 
 
-##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+##### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.jpa.BookWithFetchModeSelectRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1578,7 +1572,7 @@ void findById() {
     WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
     ```
 
-##### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
+##### <a id="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
 `com.example.spring.data.jpa.BookWithFetchModeSelectRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1656,7 +1650,7 @@ Query selects 2 books, so 5 SQL queries are executed.
     WHERE  categories0_.book_with_fetch_mode_select_id = ? /*69*/
     ```
 
-#### <a name="76b5b36ea931f6c209971594a5473ffa"></a>Entity with `@Fetch(SUBSELECT)`
+#### <a id="76b5b36ea931f6c209971594a5473ffa"></a>Entity with `@Fetch(SUBSELECT)`
 
 `com.example.spring.data.jpa.entity.BookWithFetchModeSubselect`
 
@@ -1677,7 +1671,7 @@ public class BookWithFetchModeSubselect extends AbstractBook {
 }
 ```
 
-##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+##### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.jpa.BookWithFetchModeSubselectRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1728,7 +1722,7 @@ Instead, `CrudRepository.findById` behaves like with `FetchMode.SELECT`.
     WHERE  categories0_.book_with_fetch_mode_subselect_id = ? /*35*/
     ```
 
-##### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
+##### <a id="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
 `com.example.spring.data.jpa.BookWithFetchModeSubselectRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1790,7 +1784,7 @@ But `FetchMode.SUBSELECT` ignores pagination (`LIMIT`) in the sub-select what ma
                                                               WHERE  bookwithfe0_.title LIKE ? ESCAPE ?) /*%Pattern%,\*/
     ```
 
-#### <a name="b77feec501b1fe41ebee44d25e206880"></a>Entity with `@BatchSize`
+#### <a id="b77feec501b1fe41ebee44d25e206880"></a>Entity with `@BatchSize`
 
 `com.example.spring.data.jpa.entity.BookWithBatchSize`
 
@@ -1811,7 +1805,7 @@ public class BookWithBatchSize extends AbstractBook {
 }
 ```
 
-##### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+##### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.jpa.BookWithBatchSizeRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1858,7 +1852,7 @@ So, `CrudRepository.findById` behaves like without explicitly defined `FetchMode
     WHERE  categories0_.book_with_batch_size_id = ? /*11*/
     ```
 
-##### <a name="ecfc45d33505baec3249b78ec3e66059"></a>Query method
+##### <a id="ecfc45d33505baec3249b78ec3e66059"></a>Query method
 
 `com.example.spring.data.jpa.BookWithBatchSizeRepositoryTest` extends `com.example.spring.data.jpa.AbstractBookRepositoryBaseTest`
 
@@ -1914,7 +1908,7 @@ Query selects 2 books, so 3 SQL queries are executed.
     WHERE  categories0_.book_with_batch_size_id IN ( ?, ? ) /*12,11*/
     ```
 
-#### <a name="1049387d75c060dc77f67c5477fb48d4"></a>Entity with multiple bags resulting in `MultipleBagFetchException`
+#### <a id="1049387d75c060dc77f67c5477fb48d4"></a>Entity with multiple bags resulting in `MultipleBagFetchException`
 
 Entity with multiple bags (two `@ManyToMany` collections with type `List`) resulting in `MultipleBagFetchException`
 
@@ -1974,7 +1968,7 @@ Trying to fetch multiple many-to-many relations that both have type List results
 (`List<Author> authors` and `List<Category> categories`) an exception 
 `org.hibernate.loader.MultipleBagFetchException: cannot simultaneously fetch multiple bags` is thrown.
 
-### <a name="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
+### <a id="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
 
 `com.example.spring.data.jpa.entity.BookRating`
 
@@ -2002,7 +1996,7 @@ public class BookRating {
 }
 ```
 
-#### <a name="272ede57357a5f214f2904c15e3fe103"></a>Implicit optimistic lock of entity with `@Version` on modification
+#### <a id="272ede57357a5f214f2904c15e3fe103"></a>Implicit optimistic lock of entity with `@Version` on modification
 
 `com.example.spring.data.jpa.repository.BookRatingRepository`
 
@@ -2104,7 +2098,7 @@ The following SQL queries are executed.
 
 7. Initiating transaction #1 rollback after commit exception
 
-#### <a name="502c2256dbc0a223143500d9f9b3b5cc"></a>Explicit optimistic lock `@Lock(OPTIMISTIC)`
+#### <a id="502c2256dbc0a223143500d9f9b3b5cc"></a>Explicit optimistic lock `@Lock(OPTIMISTIC)`
 
 `com.example.spring.data.jpa.repository.BookRatingRepository`
 
@@ -2205,7 +2199,7 @@ The following SQL queries are executed.
 
 7. Initiating transaction #1 rollback after commit exception
 
-#### <a name="6efaef54090120ae008692898745a547"></a>Explicit optimistic lock `@Lock(OPTIMISTIC_FORCE_INCREMENT)`
+#### <a id="6efaef54090120ae008692898745a547"></a>Explicit optimistic lock `@Lock(OPTIMISTIC_FORCE_INCREMENT)`
 
 `com.example.spring.data.jpa.repository.BookRatingRepository`
 
@@ -2304,7 +2298,7 @@ The following SQL queries are executed.
 
 7. Initiating transaction #1 rollback after commit exception
 
-#### <a name="c2b4e4a7c69f6c6b216e05a547731c57"></a>Explicit pessimistic write lock `@Lock(PESSIMISTIC_WRITE)`
+#### <a id="c2b4e4a7c69f6c6b216e05a547731c57"></a>Explicit pessimistic write lock `@Lock(PESSIMISTIC_WRITE)`
 
 `com.example.spring.data.jpa.repository.BookRatingRepository`
 
@@ -2412,7 +2406,7 @@ The following SQL queries are executed.
            AND version = ? /*1*/
     ```
 
-#### <a name="657a4b524b13a122706ee27f7675bcf7"></a>Explicit pessimistic read lock `@Lock(PESSIMISTIC_READ)`
+#### <a id="657a4b524b13a122706ee27f7675bcf7"></a>Explicit pessimistic read lock `@Lock(PESSIMISTIC_READ)`
 
 `com.example.spring.data.jpa.repository.BookRatingRepository`
 
@@ -2486,7 +2480,7 @@ The following SQL queries are executed.
 
 4. Initiating transaction #2 commit
 
-### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
+### <a id="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
 `com.example.spring.data.jpa.dto.BookDto`
 
@@ -2538,7 +2532,7 @@ void mapToDto() {
 }
 ```
 
-## <a name="1ef62fd469285970a640c75be1cbdb9a"></a>Spring Data JDBC example
+## <a id="1ef62fd469285970a640c75be1cbdb9a"></a>Spring Data JDBC example
 
 [spring-data-jdbc-examples](spring-data-jdbc-examples/) has the same domain (book, author, category, rating) like Spring Data JPA example.
 
@@ -2555,7 +2549,7 @@ In the example there are 3 Aggregates:
 
 ![Entity-relationship diagram](spring-data-jdbc-examples/img/tables.png)
 
-### <a name="ca1ea02c10b7c37f425b9b7dd86d5e11"></a>Test data
+### <a id="ca1ea02c10b7c37f425b9b7dd86d5e11"></a>Test data
 
 ```java
 void saveCategories() {
@@ -2596,7 +2590,7 @@ void saveBooks() {
 }
 ```
 
-### <a name="cf43137803fb51915f84cbc5c3068d34"></a>Queries
+### <a id="cf43137803fb51915f84cbc5c3068d34"></a>Queries
 
 ```java
 @Data
@@ -2633,7 +2627,7 @@ public final class Book {
 }
 ```
 
-#### <a name="07109b7f3df585c23975718b13843dac"></a>`CrudRepository.save`
+#### <a id="07109b7f3df585c23975718b13843dac"></a>`CrudRepository.save`
 
 During saving all entities referenced from an aggregate root are deleted and recreated.
 
@@ -2749,7 +2743,7 @@ The following SQL queries are executed.
                   ?) /*1*/
     ```
 
-#### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+#### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.jdbc.BookRepositoryTest`
 
@@ -2789,7 +2783,7 @@ void findById() {
     WHERE  "book_category"."book" = ? /*1*/
     ```
 
-#### <a name="f34c8b22bd6fb5a16c60b7ecd412d675"></a>`PagingAndSortingRepository.findAll(Pageable)`
+#### <a id="f34c8b22bd6fb5a16c60b7ecd412d675"></a>`PagingAndSortingRepository.findAll(Pageable)`
 
 `com.example.spring.data.jdbc.BookRepositoryTest`
 
@@ -2842,7 +2836,7 @@ Query selects 1 book, so 4 SQL queries are executed.
     FROM   "book"
     ```
 
-#### <a name="fe9f09d7c10598e080ef1ac1502711df"></a>`@Query` with SQL
+#### <a id="fe9f09d7c10598e080ef1ac1502711df"></a>`@Query` with SQL
 
 Spring Data JDBC is also a subject to "N+1 selects problem". 
 
@@ -2909,7 +2903,7 @@ Query selects 2 books, so 5 SQL queries are executed.
     WHERE  "book_category"."book" = ? /*2*/
     ```
 
-#### <a name="ce75f4a17b574599267b2a18924cb931"></a>`@Query` with SQL join
+#### <a id="ce75f4a17b574599267b2a18924cb931"></a>`@Query` with SQL join
 
 Spring Data JDBC doesn't have a solution to "N+1 selects problem".
 `JOIN` in SQL query leads to duplicates in the result set.
@@ -2942,7 +2936,7 @@ The EIP Book is present 2 times in the result list.
 Duplicate is caused by join of the EIP Book with 2 Authors.
 The POEAA Book has 1 author, so doesn't have duplicates in the result list.
 
-#### <a name="59581bf130250c31253eac07da3d2c56"></a>`@Query` with SQL and pagination
+#### <a id="59581bf130250c31253eac07da3d2c56"></a>`@Query` with SQL and pagination
 
 `com.example.spring.data.jdbc.repository.BookRepository`
 
@@ -3013,7 +3007,7 @@ Query selects 1 book, so 4 SQL queries are executed.
     WHERE  title LIKE Concat('%', ?, '%') /*Pattern*/
     ```
 
-### <a name="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
+### <a id="9a3347442ef97064c198bda69c16f816"></a>Locking strategies
 
 `com.example.spring.data.jdbc.entity.BookRating`
 
@@ -3044,7 +3038,7 @@ public class BookRating {
 }
 ```
 
-#### <a name="272ede57357a5f214f2904c15e3fe103"></a>Implicit optimistic lock of entity with `@Version` on modification
+#### <a id="272ede57357a5f214f2904c15e3fe103"></a>Implicit optimistic lock of entity with `@Version` on modification
 
 Spring Data JDBC supports optimistic locking by using `org.springframework.data.annotation.Version` annotation.
 The behaviour is similar to JPA with `javax.persistence.Version` annotation.
@@ -3141,7 +3135,7 @@ The following SQL queries are executed.
 
 6. Initiating transaction #1 rollback after exception
 
-### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
+### <a id="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
 `com.example.spring.data.jdbc.dto.BookDto`
 
@@ -3225,7 +3219,7 @@ void mapToDto() {
 }
 ```
 
-### <a name="fc1290b67d538903eba761ca9f952dc9"></a>Reactive `Mono.fromCallable` wrapping synchronous call
+### <a id="fc1290b67d538903eba761ca9f952dc9"></a>Reactive `Mono.fromCallable` wrapping synchronous call
 
 `com.example.spring.data.jdbc.BookRepositoryTest`
 
@@ -3241,7 +3235,7 @@ void reactiveWrapBlocking() {
 }
 ```
 
-## <a name="1418b03e9a73d96a8c697855b6c0401e"></a>Spring Data R2DBC example
+## <a id="1418b03e9a73d96a8c697855b6c0401e"></a>Spring Data R2DBC example
 
 [spring-data-r2dbc-examples](spring-data-r2dbc-examples/) has the same domain (book, author, category, rating) like Spring Data JPA example.
 
@@ -3255,11 +3249,11 @@ void reactiveWrapBlocking() {
 
 Test data is the same like in Spring Data JDBC example.
 
-### <a name="cf43137803fb51915f84cbc5c3068d34"></a>Queries
+### <a id="cf43137803fb51915f84cbc5c3068d34"></a>Queries
 
 `com.example.spring.data.r2dbc.BookRepositoryTest`
 
-#### <a name="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
+#### <a id="4a2070d3aad7ff832b5e36f76cc6f731"></a>`CrudRepository.findById`
 
 `com.example.spring.data.r2dbc.BookRepositoryTest`
 
@@ -3281,7 +3275,7 @@ WHERE  book.id = $1
 LIMIT  2
 ```
 
-#### <a name="74790cb9ca9d56e09b465befb7c7603b"></a>Query method with `Sort`
+#### <a id="74790cb9ca9d56e09b465befb7c7603b"></a>Query method with `Sort`
 
 `com.example.spring.data.r2dbc.repository.BookRepository`
 
@@ -3313,7 +3307,7 @@ WHERE  book.title LIKE $1
 ORDER  BY publication_date ASC
 ```
 
-#### <a name="59581bf130250c31253eac07da3d2c56"></a>`@Query` with SQL and pagination
+#### <a id="59581bf130250c31253eac07da3d2c56"></a>`@Query` with SQL and pagination
 
 To create an instance of `org.springframework.data.domain.PageImpl` implementing `org.springframework.data.domain.Page` 
 a result set and total number of elements are required. 
@@ -3376,7 +3370,7 @@ void queryMethodWithPagination() {
     WHERE  title LIKE Concat('%', :title, '%')
     ```
 
-#### <a name="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
+#### <a id="532d5a8c2809912b992aa517d1e46ced"></a>Mapping from entity to DTO using MapStruct
 
 Fetching associations and mapping to DTO are not easy tasks with Spring Data R2DBC.
 The parent entity has to be merged with its associations.

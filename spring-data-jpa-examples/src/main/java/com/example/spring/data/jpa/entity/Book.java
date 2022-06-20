@@ -16,30 +16,26 @@
 
 package com.example.spring.data.jpa.entity;
 
-import static javax.persistence.FetchType.EAGER;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import static javax.persistence.FetchType.EAGER;
+
 @Entity
-@NamedEntityGraph(name = "Book.authors",
-    attributeNodes = @NamedAttributeNode("authors")
-)
-@NamedEntityGraph(name = "Book.authors-categories",
-    attributeNodes = {
-        @NamedAttributeNode("authors"),
-        @NamedAttributeNode("categories")
-    }
-)
+@NamedEntityGraph(name = "Book.authors", attributeNodes = @NamedAttributeNode("authors"))
+@NamedEntityGraph(
+    name = "Book.authors-categories",
+    attributeNodes = {@NamedAttributeNode("authors"), @NamedAttributeNode("categories")})
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @ToString(callSuper = true)
@@ -48,6 +44,5 @@ public class Book extends AbstractBook {
   @ManyToMany(fetch = EAGER)
   private List<Author> authors = new ArrayList<>();
 
-  @ManyToMany
-  private Set<Category> categories = new LinkedHashSet<>();
+  @ManyToMany private Set<Category> categories = new LinkedHashSet<>();
 }

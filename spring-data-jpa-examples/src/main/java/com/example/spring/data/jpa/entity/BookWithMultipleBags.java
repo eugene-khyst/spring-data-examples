@@ -16,39 +16,28 @@
 
 package com.example.spring.data.jpa.entity;
 
-import static javax.persistence.FetchType.EAGER;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.NaturalId;
 
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static javax.persistence.FetchType.EAGER;
+
 @Entity
-@NamedEntityGraph(name = "BookWithMultipleBags.authors-categories",
-    attributeNodes = {
-        @NamedAttributeNode("authors"),
-        @NamedAttributeNode("categories")
-    }
-)
+@NamedEntityGraph(
+    name = "BookWithMultipleBags.authors-categories",
+    attributeNodes = {@NamedAttributeNode("authors"), @NamedAttributeNode("categories")})
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class BookWithMultipleBags {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+  @Id @GeneratedValue private Long id;
 
-  @NaturalId
-  @EqualsAndHashCode.Include
-  private String isbn;
+  @NaturalId @EqualsAndHashCode.Include private String isbn;
 
   private String title;
 
@@ -57,9 +46,8 @@ public class BookWithMultipleBags {
   @ManyToMany(fetch = EAGER)
   private List<Author> authors = new ArrayList<>();
 
-  @ManyToMany
-  private List<Category> categories = new ArrayList<>();
-  //Instead of Set<Category> like in AbstractBook and its children
-  //Multiple many-to-many relations of type List with 'FetchMode.JOIN' leads to
-  //MultipleBagFetchException: cannot simultaneously fetch multiple bags
+  @ManyToMany private List<Category> categories = new ArrayList<>();
+  // Instead of Set<Category> like in AbstractBook and its children
+  // Multiple many-to-many relations of type List with 'FetchMode.JOIN' leads to
+  // MultipleBagFetchException: cannot simultaneously fetch multiple bags
 }

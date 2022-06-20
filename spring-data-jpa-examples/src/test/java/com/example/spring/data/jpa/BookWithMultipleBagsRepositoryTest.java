@@ -16,27 +16,17 @@
 
 package com.example.spring.data.jpa;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-
 import com.example.spring.data.jpa.entity.Author;
 import com.example.spring.data.jpa.entity.BookWithMultipleBags;
 import com.example.spring.data.jpa.entity.Category;
 import com.example.spring.data.jpa.repository.AuthorRepository;
 import com.example.spring.data.jpa.repository.BookWithMultipleBagsRepository;
 import com.example.spring.data.jpa.repository.CategoryRepository;
-import java.lang.reflect.Method;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.loader.MultipleBagFetchException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,83 +40,86 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(PER_CLASS)
 @DataJpaTest(showSql = false)
 @AutoConfigureTestDatabase(replace = NONE)
 @Transactional(readOnly = true)
-@Import(ProxyDataSourceConfig.class)
+@Import(DatasourceProxyBeanPostProcessor.class)
 @Slf4j
-class BookWithMultipleBagsRepositoryTest extends AbstractContainerBaseTest {
-
-  @Autowired
-  private BookWithMultipleBagsRepository bookRepository;
-
-  @Autowired
-  private CategoryRepository categoryRepository;
-
-  @Autowired
-  private AuthorRepository authorRepository;
-
-  @Autowired
-  private TransactionTemplate transactionTemplate;
+class BookWithMultipleBagsRepositoryTest extends BaseIntegrationTest {
 
   Category softwareDevelopment;
   Category systemDesign;
-
   Author martinFowler;
-
   BookWithMultipleBags poeaa;
+  @Autowired private BookWithMultipleBagsRepository bookRepository;
+  @Autowired private CategoryRepository categoryRepository;
+  @Autowired private AuthorRepository authorRepository;
+  @Autowired private TransactionTemplate transactionTemplate;
 
   @BeforeAll
   void baseSetUp() {
-    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-      @Override
-      protected void doInTransactionWithoutResult(TransactionStatus status) {
-        softwareDevelopment = new Category("Software development");
-        categoryRepository.save(softwareDevelopment);
+    transactionTemplate.execute(
+        new TransactionCallbackWithoutResult() {
+          @Override
+          protected void doInTransactionWithoutResult(TransactionStatus status) {
+            softwareDevelopment = new Category("Software development");
+            categoryRepository.save(softwareDevelopment);
 
-        systemDesign = new Category("System design");
-        categoryRepository.save(systemDesign);
+            systemDesign = new Category("System design");
+            categoryRepository.save(systemDesign);
 
-        martinFowler = new Author("Martin Fowler");
-        authorRepository.save(martinFowler);
+            martinFowler = new Author("Martin Fowler");
+            authorRepository.save(martinFowler);
 
-        poeaa = new BookWithMultipleBags();
-        poeaa.setIsbn("007-6092019909");
-        poeaa.setTitle("Patterns of Enterprise Application Architecture");
-        poeaa.setPublicationDate(LocalDate.parse("2002-11-15"));
-        poeaa.getAuthors().addAll(List.of(martinFowler));
-        poeaa.getCategories().addAll(List.of(softwareDevelopment, systemDesign));
-        bookRepository.save(poeaa);
-      }
-    });
+            poeaa = new BookWithMultipleBags();
+            poeaa.setIsbn("007-6092019909");
+            poeaa.setTitle("Patterns of Enterprise Application Architecture");
+            poeaa.setPublicationDate(LocalDate.parse("2002-11-15"));
+            poeaa.getAuthors().addAll(List.of(martinFowler));
+            poeaa.getCategories().addAll(List.of(softwareDevelopment, systemDesign));
+            bookRepository.save(poeaa);
+          }
+        });
   }
 
   @AfterAll
   void baseCleanUp() {
-    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-      @Override
-      protected void doInTransactionWithoutResult(TransactionStatus status) {
-        bookRepository.deleteAll();
-        authorRepository.deleteAll();
-        categoryRepository.deleteAll();
-      }
-    });
+    transactionTemplate.execute(
+        new TransactionCallbackWithoutResult() {
+          @Override
+          protected void doInTransactionWithoutResult(TransactionStatus status) {
+            bookRepository.deleteAll();
+            authorRepository.deleteAll();
+            categoryRepository.deleteAll();
+          }
+        });
   }
 
   @Test
   void multipleBagFetchException() {
     log.info("MultipleBagFetchException on @EntityGraph with multiple attribute nodes");
 
-    assertThatThrownBy(() -> bookRepository.findByPublicationDateBetween(
-        LocalDate.parse("2000-01-01"), LocalDate.parse("2020-01-01"),
-        Sort.by(ASC, "publicationDate")))
+    assertThatThrownBy(
+            () ->
+                bookRepository.findByPublicationDateBetween(
+                    LocalDate.parse("2000-01-01"),
+                    LocalDate.parse("2020-01-01"),
+                    Sort.by(ASC, "publicationDate")))
         .hasRootCauseInstanceOf(MultipleBagFetchException.class)
         .hasMessageContaining("cannot simultaneously fetch multiple bags");
-    //Trying to fetch multiple many-to-many relations
-    //List<Author> authors and List<Category> categories
-    //that both have type List results in exception
-    //org.hibernate.loader.MultipleBagFetchException: cannot simultaneously fetch multiple bags
+    // Trying to fetch multiple many-to-many relations
+    // List<Author> authors and List<Category> categories
+    // that both have type List results in exception
+    // org.hibernate.loader.MultipleBagFetchException: cannot simultaneously fetch multiple bags
   }
 }

@@ -17,11 +17,12 @@
 package com.example.spring.data.jpa.repository;
 
 import com.example.spring.data.jpa.entity.BookWithMultipleBags;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface BookWithMultipleBagsRepository extends JpaRepository<BookWithMultipleBags, Long> {
 
